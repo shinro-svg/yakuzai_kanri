@@ -1,0 +1,24 @@
+{
+  "name": "薬剤部ナレッジ管理",
+  "short_name": "薬剤部ナレッジ",
+  "description": "医薬品変更・供給問題・臨時購入の共有ツール（試作版）",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f9",
+  "theme_color": "#123f63",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
