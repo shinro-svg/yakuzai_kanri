@@ -61,6 +61,16 @@
 <div class="field"><label for="cloudPassword">パスワード</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="パスワード"></div>
 </div>
 <div class="setting-actions" style="margin-top:10px"><button class="btn primary" id="cloudLogin">ログインして共有を開始</button><button class="btn hidden" id="cloudLogout">ログアウト</button><button class="btn hidden" id="syncNow">今すぐ同期</button></div>
+<div id="inviteSetupPanel" class="card" style="display:none;margin-top:14px;border:1px solid #9ac3dc;background:#f4f9fc;padding:14px">
+  <h3 id="inviteSetupTitle" style="margin-top:0">招待アカウントの初期設定</h3>
+  <p id="inviteSetupMessage">招待リンクを確認しました。新しいパスワードを設定してください。</p>
+  <div class="form-grid">
+    <div class="field"><label for="inviteNewPassword">新しいパスワード</label><input id="inviteNewPassword" type="password" autocomplete="new-password" placeholder="8文字以上を推奨"></div>
+    <div class="field"><label for="inviteConfirmPassword">新しいパスワード（確認）</label><input id="inviteConfirmPassword" type="password" autocomplete="new-password" placeholder="もう一度入力"></div>
+  </div>
+  <div class="setting-actions" style="margin-top:10px"><button class="btn primary" id="setInvitePassword">パスワードを設定</button></div>
+  <p id="inviteSetupStatus" class="form-note" role="status" style="margin-top:10px"></p>
+</div>
 <div class="notice" id="cloudStatusDetail" role="status" style="margin-top:12px">共有設定がまだ完了していません。Supabaseを設定すると、複数端末でデータを共有できます。</div>
 <div class="form-note" style="margin-top:8px">接続にはSupabaseのProject URLと公開キーを使用します。service_role keyは絶対に入力しないでください。利用者はSupabase管理画面から招待してください。</div>
 </div>
@@ -71,7 +81,7 @@
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v0.2｜共有データベース対応</div>
+<div class="footer">薬剤部ナレッジ管理 v0.3｜共有データベース・招待設定対応</div>
 </main>
 </div>
 
@@ -195,6 +205,55 @@ function isCloudReady(){return !!(cloudConfig&&cloudConfig.url&&cloudConfig.key&
 function setCloudStatus(label,detail,error=false){const el=$('#cloudStatus');if(el){el.textContent=label;el.classList.toggle('sync-error',!!error)}const d=$('#cloudStatusDetail');if(d&&detail)d.textContent=detail;const logout=$('#cloudLogout'),sync=$('#syncNow'),login=$('#cloudLogin');if(logout)logout.classList.toggle('hidden',!cloudSession);if(sync)sync.classList.toggle('hidden',!isCloudReady());if(login)login.classList.toggle('hidden',!!cloudSession)}
 function setCloudConfigFields(){if($('#cloudProjectUrl'))$('#cloudProjectUrl').value=cloudConfig?.url||'';if($('#cloudAnonKey'))$('#cloudAnonKey').value=cloudConfig?.key||''}
 function cleanConfigFromFields(){const url=$('#cloudProjectUrl').value.trim().replace(/\/+$/,'');const key=$('#cloudAnonKey').value.trim();if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)&&!/^https:\/\//i.test(url))throw new Error('Project URLはhttps://から始まるURLを入力してください');if(!url)throw new Error('Project URLを入力してください');if(!key)throw new Error('Publishable keyまたはanon keyを入力してください');if(/service_role|sb_secret_/i.test(key))throw new Error('secret key / service_role keyは使用できません。publishable keyまたはanon keyを入力してください');return {url,key}}
+let pendingInvite = null;
+function inspectInviteLink(){
+  const hash=(location.hash||'').replace(/^#/,'');
+  if(!hash || !hash.includes('=')) return;
+  const params=new URLSearchParams(hash);
+  const type=params.get('type');
+  const accessToken=params.get('access_token');
+  const refreshToken=params.get('refresh_token');
+  if(params.get('error') || params.get('error_description')){
+    const panel=$('#inviteSetupPanel'); panel.style.display='block';
+    $('#inviteSetupTitle').textContent='招待リンクを確認できません';
+    $('#inviteSetupMessage').textContent=params.get('error_description') || params.get('error');
+    $('#inviteSetupStatus').textContent='Supabaseの招待リンクが期限切れの場合は、管理者に再招待を依頼してください。';
+    $('#setInvitePassword').disabled=true; switchTab('settings'); return;
+  }
+  if((type==='invite'||type==='recovery') && accessToken){
+    pendingInvite={accessToken,refreshToken,type};
+    $('#inviteSetupPanel').style.display='block';
+    $('#inviteSetupTitle').textContent=type==='invite'?'招待アカウントの初期設定':'パスワードの再設定';
+    $('#inviteSetupMessage').textContent='リンクを確認しました。新しいパスワードを2回入力し、「パスワードを設定」を押してください。';
+    $('#inviteSetupStatus').textContent=cloudConfig?'共有設定を確認済みです。パスワードを設定できます。':'先にこの画面上部でSupabase Project URLとPublishable keyを保存してください。';
+    $('#setInvitePassword').disabled=!cloudConfig;
+    switchTab('settings');
+  }
+}
+async function setInvitedUserPassword(){
+  const status=$('#inviteSetupStatus');
+  try{
+    if(!pendingInvite) throw new Error('招待リンクの情報が見つかりません。招待メールのリンクをもう一度開いてください。');
+    if(!cloudConfig?.url||!cloudConfig?.key) throw new Error('先にSupabase Project URLとPublishable keyを保存してください。');
+    const password=$('#inviteNewPassword').value;
+    const confirmPassword=$('#inviteConfirmPassword').value;
+    if(password.length<8) throw new Error('パスワードは8文字以上にしてください。');
+    if(password!==confirmPassword) throw new Error('2つのパスワードが一致しません。');
+    $('#setInvitePassword').disabled=true; status.textContent='パスワードを設定しています…';
+    const res=await fetch(cloudConfig.url+'/auth/v1/user',{method:'PUT',headers:{'Content-Type':'application/json','apikey':cloudConfig.key,'Authorization':'Bearer '+pendingInvite.accessToken},body:JSON.stringify({password})});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.msg||data.message||data.error_description||'パスワードを設定できませんでした。招待リンクの期限をご確認ください。');
+    const email=data.email||data.user?.email||'';
+    history.replaceState(null,document.title,location.pathname+location.search);
+    pendingInvite=null; $('#inviteSetupPanel').style.display='none';
+    if(email) $('#cloudEmail').value=email;
+    $('#cloudPassword').value=''; $('#inviteNewPassword').value=''; $('#inviteConfirmPassword').value='';
+    status.textContent='';
+    setCloudStatus('● パスワード設定完了','招待アカウントの初期設定が完了しました。メールアドレスと新しいパスワードでログインしてください。');
+    toast('パスワードを設定しました。続けてログインしてください。');
+  }catch(e){status.textContent=e.message; $('#setInvitePassword').disabled=false;}
+}
+
 async function refreshCloudSession(){if(!cloudConfig||!cloudSession?.refresh_token)throw new Error('ログインが必要です');const res=await fetch(cloudConfig.url+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'Content-Type':'application/json','apikey':cloudConfig.key},body:JSON.stringify({refresh_token:cloudSession.refresh_token})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.msg||data.message||data.error_description||'ログイン期限が切れました。再度ログインしてください');cloudSession={...data,expires_at:Date.now()+(Number(data.expires_in||3600)*1000)};localStorage.setItem(CLOUD_SESSION_KEY,JSON.stringify(cloudSession));return cloudSession}
 async function ensureFreshSession(){if(!cloudSession?.access_token)throw new Error('ログインしてください');if(cloudSession.expires_at&&Date.now()>cloudSession.expires_at-60000)await refreshCloudSession()}
 async function cloudFetch(path,options={}){if(!cloudConfig?.url||!cloudConfig?.key)throw new Error('共有設定を先に保存してください');if(options.auth!==false)await ensureFreshSession();const headers={'apikey':cloudConfig.key,'Content-Type':'application/json',...(options.headers||{})};if(options.auth!==false)headers.Authorization='Bearer '+cloudSession.access_token;else headers.Authorization='Bearer '+cloudConfig.key;const res=await fetch(cloudConfig.url+path,{...options,headers});if(res.status===401&&options.auth!==false){await refreshCloudSession();headers.Authorization='Bearer '+cloudSession.access_token;const retry=await fetch(cloudConfig.url+path,{...options,headers});if(!retry.ok){const e=await retry.json().catch(()=>({}));throw new Error(e.message||e.msg||e.error_description||('共有先エラー '+retry.status))}return retry}if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||e.msg||e.error_description||('共有先エラー '+res.status))}return res}
@@ -222,11 +281,12 @@ function startCloudPolling(){if(pollHandle)clearInterval(pollHandle);pollHandle=
 async function syncLoginState(){const row=await cloudReadRow();const remote=normalizeState(row.data);const local=withoutSamples(state);if(isEmptyState(remote)&&hasRealLocalData(local)){if(confirm('共有データベースは空です。この端末にあるサンプル以外のデータを共有先へ移行しますか？')){state=local;lastSyncedState=emptyState();lastRemoteUpdatedAt=row.updated_at||null;const migrated=await pushSharedState('この端末のデータを共有先へ移行しました');if(!migrated){startCloudPolling();return}}else{endLoginKeepLocal('移行は行わず、この端末のデータを保持しました。共有機能を使うには、再度ログインして移行を選んでください。');return}}else if(!isEmptyState(remote)&&hasRealLocalData(local)&&hasLocalDifferences(local,remote)){if(confirm('共有データと、この端末にだけある、または内容が異なる記録があります。サンプル以外の端末データを共有データへ統合しますか？')){state=local;lastSyncedState=emptyState();lastRemoteUpdatedAt=row.updated_at||null;const merged=await pushSharedState('端末データを共有データへ統合しました');if(!merged){startCloudPolling();return}}else{endLoginKeepLocal('端末データを保持するため、共有ログインを解除しました。共有データを使う場合は、JSONバックアップ後に再ログインしてください。');return}}else adoptRemoteState(row);startCloudPolling();setCloudStatus('● 共有接続中','ログイン中：'+(cloudSession.user?.email||'利用者')+'。同じ共有設定の端末と自動同期します。')}
 async function handleCloudLogin(){try{const email=$('#cloudEmail').value.trim(),password=$('#cloudPassword').value;if(!email||!password)throw new Error('メールアドレスとパスワードを入力してください');await loginCloud(email,password);await syncLoginState();$('#cloudPassword').value='';}catch(e){setCloudStatus('● 接続エラー',e.message,true);toast(e.message)}}
 async function handleCloudLogout(){if(!confirm('共有データからログアウトしますか？端末の共有データ表示を消去します。必要な場合は先にバックアップしてください。'))return;try{if(cloudSession?.access_token&&cloudConfig?.url)await fetch(cloudConfig.url+'/auth/v1/logout',{method:'POST',headers:{'apikey':cloudConfig.key,'Authorization':'Bearer '+cloudSession.access_token}})}catch(_){}if(pollHandle)clearInterval(pollHandle);pollHandle=null;cloudSession=null;lastSyncedState=null;lastRemoteUpdatedAt=null;localStorage.removeItem(CLOUD_SESSION_KEY);state=emptyState();persist();renderAll();setCloudStatus('● ログアウト中','ログアウトしました。共有データは再ログイン後に表示されます。');}
-$('#saveCloudConfig').addEventListener('click',()=>{try{const cfg=cleanConfigFromFields();const changed=!cloudConfig||cloudConfig.url!==cfg.url||cloudConfig.key!==cfg.key;if(changed&&cloudSession){if(!confirm('接続先が変わります。現在の共有セッションからログアウトします。続けますか？'))return;cloudSession=null;localStorage.removeItem(CLOUD_SESSION_KEY);if(pollHandle)clearInterval(pollHandle);pollHandle=null;}cloudConfig=cfg;localStorage.setItem(CLOUD_CONFIG_KEY,JSON.stringify(cloudConfig));setCloudStatus(cloudSession?'● 共有接続中':'● 接続設定済み',cloudSession?'共有設定を更新しました。':'接続情報を保存しました。次に招待された利用者でログインしてください。');toast('共有接続情報を保存しました');}catch(e){setCloudStatus('● 設定エラー',e.message,true);toast(e.message)}});
+$('#saveCloudConfig').addEventListener('click',()=>{try{const cfg=cleanConfigFromFields();const changed=!cloudConfig||cloudConfig.url!==cfg.url||cloudConfig.key!==cfg.key;if(changed&&cloudSession){if(!confirm('接続先が変わります。現在の共有セッションからログアウトします。続けますか？'))return;cloudSession=null;localStorage.removeItem(CLOUD_SESSION_KEY);if(pollHandle)clearInterval(pollHandle);pollHandle=null;}cloudConfig=cfg;localStorage.setItem(CLOUD_CONFIG_KEY,JSON.stringify(cloudConfig));if(pendingInvite){$('#setInvitePassword').disabled=false;$('#inviteSetupStatus').textContent='接続情報を保存しました。新しいパスワードを設定してください。';}setCloudStatus(cloudSession?'● 共有接続中':'● 接続設定済み',cloudSession?'共有設定を更新しました。':'接続情報を保存しました。次に招待された利用者でログインしてください。');toast('共有接続情報を保存しました');}catch(e){setCloudStatus('● 設定エラー',e.message,true);toast(e.message)}});
 $('#checkCloudConfig').addEventListener('click',async()=>{try{const cfg=cleanConfigFromFields();cloudConfig=cfg;localStorage.setItem(CLOUD_CONFIG_KEY,JSON.stringify(cloudConfig));const r=await fetch(cfg.url+'/auth/v1/health',{headers:{apikey:cfg.key,Authorization:'Bearer '+cfg.key}});if(!r.ok)throw new Error('接続先から正常な応答がありません（'+r.status+'）');setCloudStatus(cloudSession?'● 共有接続中':'● 接続確認済み','Supabaseへの接続を確認しました。共有データの読み書きにはログインが必要です。');toast('接続確認に成功しました');}catch(e){setCloudStatus('● 接続エラー',e.message,true);toast(e.message)}});
-$('#cloudLogin').addEventListener('click',handleCloudLogin);$('#cloudLogout').addEventListener('click',handleCloudLogout);$('#syncNow').addEventListener('click',()=>{if(lastSyncedState&&!equalJson(state,lastSyncedState))queueCloudSave('手動同期しました');else refreshFromCloud(true)});
+$('#cloudLogin').addEventListener('click',handleCloudLogin);$('#cloudLogout').addEventListener('click',handleCloudLogout);$('#syncNow').addEventListener('click',()=>{if(lastSyncedState&&!equalJson(state,lastSyncedState))queueCloudSave('手動同期しました');else refreshFromCloud(true)});$('#setInvitePassword').addEventListener('click',setInvitedUserPassword);
 window.addEventListener('online',()=>{if(isCloudReady())queueCloudSave('');});window.addEventListener('focus',()=>{if(isCloudReady())refreshFromCloud(false)});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&isCloudReady())refreshFromCloud(false)});
 setCloudConfigFields();
+inspectInviteLink();
 if(cloudConfig)setCloudStatus(cloudSession?'● 接続確認中':'● 接続設定済み',cloudSession?'保存済みのログイン情報を確認しています。':'共有データベース設定済みです。ログインすると共有できます。');
 renderAll();
 if(cloudSession&&cloudConfig){(async()=>{try{await ensureFreshSession();await syncLoginState()}catch(e){cloudSession=null;localStorage.removeItem(CLOUD_SESSION_KEY);setCloudStatus('● 再ログインが必要',e.message,true)}})();}
