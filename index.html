@@ -94,7 +94,7 @@
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v0.7｜フォーム誤閉じ防止・入力者欄の初期値空欄</div>
+<div class="footer">薬剤部ナレッジ管理 v0.8｜見積入力者を案件共通欄に集約</div>
 </main>
 </div>
 
@@ -199,8 +199,23 @@ function quoteValue(c,index,prop){
  const lower=prop.charAt(0).toLowerCase()+prop.slice(1);
  return row.prices?.[prop]??row.prices?.[lower]??row[prop]??row[lower]??'';
 }
+function quoteEnteredByValue(c){
+ const shared=String(c?.quoteEnteredBy??'').trim();
+ // 新形式では共通欄が存在すれば、空欄も明示値として扱い、旧個別値の再表示を防ぎます。
+ if(c && Object.prototype.hasOwnProperty.call(c,'quoteEnteredBy')) return shared;
+ // 旧版では見積ごとに入力者を保持していたため、過去データは最初に見つかった値を共通欄へ引き継ぎます。
+ for(let i=1;i<=4;i++) for(const supplier of quoteSuppliers){
+  const legacyFlat=c?.[`quoteAlt${i}${supplier.key}EnteredBy`];
+  if(String(legacyFlat??'').trim()) return String(legacyFlat).trim();
+  const row=Array.isArray(c?.alternativeQuotes)?c.alternativeQuotes[i-1]:null;
+  const legacyNested=row?.quotes?.[supplier.key]?.enteredBy;
+  if(String(legacyNested??'').trim()) return String(legacyNested).trim();
+ }
+ return '';
+}
 function quoteMetaValue(c,index,supplierKey,field){
- const suffix={unit:'Unit',expiry:'Expiry',quoteDate:'QuoteDate',enteredBy:'EnteredBy'}[field];
+ if(field==='enteredBy') return quoteEnteredByValue(c);
+ const suffix={unit:'Unit',expiry:'Expiry',quoteDate:'QuoteDate'}[field];
  const flatKey=`quoteAlt${index}${supplierKey}${suffix}`;
  if(c && c[flatKey]!==undefined && c[flatKey]!==null) return c[flatKey];
  const row=Array.isArray(c?.alternativeQuotes)?c.alternativeQuotes[index-1]:null;
@@ -216,13 +231,11 @@ function quoteCandidateMarkup(c,index,legacyNames){
   const unit=quoteMetaValue(c,index,s.key,'unit');
   const expiry=quoteMetaValue(c,index,s.key,'expiry');
   const quoteDate=quoteMetaValue(c,index,s.key,'quoteDate');
-  const enteredBy=quoteMetaValue(c,index,s.key,'enteredBy');
   return `<div class="quote-vendor-card"><div class="quote-vendor-title">${esc(s.label)}</div><div class="quote-vendor-fields">
    <div class="field"><label for="f_${base}">見積価格（円）</label><input id="f_${base}" name="${base}" type="number" min="0" step="any" value="${val({v:price},'v')}" placeholder="価格" inputmode="decimal"></div>
    <div class="field"><label for="f_${base}Unit">単位（例：円/箱）</label><input id="f_${base}Unit" name="${base}Unit" type="text" value="${val({v:unit},'v')}" placeholder="円/箱"></div>
    <div class="field"><label for="f_${base}Expiry">見積有効期限</label><input id="f_${base}Expiry" name="${base}Expiry" type="date" value="${val({v:expiry},'v')}"></div>
    <div class="field"><label for="f_${base}QuoteDate">見積取得日</label><input id="f_${base}QuoteDate" name="${base}QuoteDate" type="date" value="${val({v:quoteDate},'v')}"></div>
-   <div class="field quote-wide"><label for="f_${base}EnteredBy">入力者</label><input id="f_${base}EnteredBy" name="${base}EnteredBy" type="text" value="${val({v:enteredBy},'v')}"></div>
   </div></div>`;
  }).join('');
  return `<div class="quote-candidate"><div class="quote-candidate-title">代替薬候補 ${index}</div><div class="field quote-candidate-name"><label for="f_quoteAlt${index}Name">候補薬名・規格</label><input id="f_quoteAlt${index}Name" name="quoteAlt${index}Name" type="text" value="${val({v:name},'v')}" placeholder="薬剤師が候補を入力"></div><div class="quote-input-grid">${vendors}</div></div>`;
@@ -235,9 +248,9 @@ function getQuoteCount(c){
 function openCaseModal(id=null){
  const c=state.cases.find(x=>x.id===id)||{};const isEdit=!!id;const legacyNames=legacyAlternativeNames(c);
  const quoteInputs=[1,2,3,4].map(i=>quoteCandidateMarkup(c,i,legacyNames)).join('');
- const html=`<div class="notice">ここでは医薬品の問題と薬剤部内の対応方針を記録します。代替薬や切替の最終判断は、施設の承認手順に従ってください。</div><div class="form-section">医薬品・問題の情報</div><div class="form-grid">${inputField('<span class="required">*</span> 医薬品名','drugName',c.drugName||'','text','required')}${inputField('成分名','ingredient',c.ingredient||'')}${inputField('規格・剤形','strength',c.strength||'')}${inputField('薬価基準収載コード等（任意）','code',c.code||'')}${selectField('事象の種類','type',caseTypes,c.type||'経過措置')}${inputField('事象を把握した日','issueDate',c.issueDate||today(),'date')}${inputField('経過措置期限','deadline',c.deadline||'','date')}${inputField('院内在庫数（数量のみ）','stock',c.stock??'','number','min="0" step="any"')}${inputField('在庫消尽見込日','stockoutDate',c.stockoutDate||'','date')}${inputField('切替予定日','switchDate',c.switchDate||'','date')}</div><div class="form-section">代替薬候補と卸5社の見積もり</div><div class="notice">薬剤師が候補薬名・規格を登録し、SPDが卸ごとの見積情報を入力します。候補は最大4剤、卸5社で最大20件です。価格の単位、見積有効期限、取得日、入力者も記録してください。見積価格を変更すると、見積取得日は当日の日付を自動補完します。入力者欄は空欄のまま表示され、必要に応じて入力してください。</div><div class="quote-subtitle">未取得の見積情報は空欄のままにしてください。価格単位や税込・税別条件は卸間で比較できるよう確認してください。</div>${quoteInputs}<div class="form-section">決定・対応計画</div><div class="form-grid">${inputField('決定した代替薬','selectedAlternative',c.selectedAlternative||'')}${selectField('対応状況','status',statusList,c.status||'未着手')}${inputField('担当者','owner',c.owner||'')}${inputField('最終決定者','decisionMaker',c.decisionMaker||'')}${textareaField('決定理由・検討内容','decisionReason',c.decisionReason||'','full')}${textareaField('備考・関連部署への連絡状況','notes',c.notes||'','full')}</div><div class="form-note">在庫数は自動で在庫管理システムと連動しません。手入力の参考値です。見積価格は入力者が確認した値を記録し、発注前に最新見積もりを再確認してください。</div>`;
+ const html=`<div class="notice">ここでは医薬品の問題と薬剤部内の対応方針を記録します。代替薬や切替の最終判断は、施設の承認手順に従ってください。</div><div class="form-section">医薬品・問題の情報</div><div class="form-grid">${inputField('<span class="required">*</span> 医薬品名','drugName',c.drugName||'','text','required')}${inputField('成分名','ingredient',c.ingredient||'')}${inputField('規格・剤形','strength',c.strength||'')}${inputField('薬価基準収載コード等（任意）','code',c.code||'')}${selectField('事象の種類','type',caseTypes,c.type||'経過措置')}${inputField('事象を把握した日','issueDate',c.issueDate||today(),'date')}${inputField('経過措置期限','deadline',c.deadline||'','date')}${inputField('院内在庫数（数量のみ）','stock',c.stock??'','number','min="0" step="any"')}${inputField('在庫消尽見込日','stockoutDate',c.stockoutDate||'','date')}${inputField('切替予定日','switchDate',c.switchDate||'','date')}</div><div class="form-section">代替薬候補と卸5社の見積もり</div><div class="notice">薬剤師が候補薬名・規格を登録し、SPDが卸ごとの見積情報を入力します。候補は最大4剤、卸5社で最大20件です。価格・単位・見積有効期限・見積取得日は見積ごとに記録し、入力者は下の共通欄に1人分だけ入力します。見積価格を変更すると、見積取得日は当日の日付を自動補完します。</div><div class="form-grid"><div class="field full"><label for="f_quoteEnteredBy">見積入力者（全見積共通）</label><input id="f_quoteEnteredBy" name="quoteEnteredBy" type="text" value="${val({v:quoteEnteredByValue(c)},'v')}" placeholder="必要に応じて入力"></div></div><div class="quote-subtitle">未取得の見積情報は空欄のままにしてください。価格単位や税込・税別条件は卸間で比較できるよう確認してください。</div>${quoteInputs}<div class="form-section">決定・対応計画</div><div class="form-grid">${inputField('決定した代替薬','selectedAlternative',c.selectedAlternative||'')}${selectField('対応状況','status',statusList,c.status||'未着手')}${inputField('担当者','owner',c.owner||'')}${inputField('最終決定者','decisionMaker',c.decisionMaker||'')}${textareaField('決定理由・検討内容','decisionReason',c.decisionReason||'','full')}${textareaField('備考・関連部署への連絡状況','notes',c.notes||'','full')}</div><div class="form-note">在庫数は自動で在庫管理システムと連動しません。手入力の参考値です。見積価格は入力者が確認した値を記録し、発注前に最新見積もりを再確認してください。</div>`;
  openModal(isEdit?'対応案件を編集':'対応案件を登録',html,'case',id);
- // 見積価格を変更した場合は取得日だけを補助入力します。入力者欄は自動入力せず空欄のままにします。
+ // 見積価格を変更した場合は取得日だけを補助入力します。入力者は案件共通欄で1回だけ管理します。
  for(let i=1;i<=4;i++) for(const supplier of quoteSuppliers){
   const base=`quoteAlt${i}${supplier.key}`;
   const price=$(`#f_${base}`), dateField=$(`#f_${base}QuoteDate`);
@@ -256,7 +269,7 @@ function saveCase(f){
   for(const supplier of quoteSuppliers){
    const base=`quoteAlt${i}${supplier.key}`;
    const price=String(f[base]??'').trim();
-   const detail={price,unit:String(f[`${base}Unit`]??'').trim(),expiry:String(f[`${base}Expiry`]??'').trim(),quoteDate:String(f[`${base}QuoteDate`]??'').trim(),enteredBy:String(f[`${base}EnteredBy`]??'').trim()};
+   const detail={price,unit:String(f[`${base}Unit`]??'').trim(),expiry:String(f[`${base}Expiry`]??'').trim(),quoteDate:String(f[`${base}QuoteDate`]??'').trim()};
    prices[supplier.key]=price;quotes[supplier.key]=detail;
    if(Object.values(detail).some(v=>v!==''))hasQuoteData=true;
   }
@@ -265,6 +278,7 @@ function saveCase(f){
  }
  f.alternatives=quoteRows.map(r=>r.name).filter(Boolean).join('\n');
  f.alternativeQuotes=quoteRows;
+ f.quoteEnteredBy=String(f.quoteEnteredBy??'').trim();
  const item={...old,...f,id:editingId||uid(),stock:f.stock,createdAt:old?.createdAt||now(),updatedAt:now(),sample:false};
  state.cases=editingId?state.cases.map(c=>c.id===editingId?item:c):[item,...state.cases];
  let summary=editingId?'対応案件を更新':'対応案件を登録';
@@ -288,9 +302,9 @@ function csvEscape(v){let s=String(v??'');if(/[",\r\n]/.test(s))s='"'+s.replaceA
 function download(name,content,type='text/csv;charset=utf-8'){const blob=new Blob(['\ufeff',content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function exportCsv(keys,rows,name){download(name,[keys.map(k=>csvEscape(k[0])).join(','),...rows.map(r=>keys.map(k=>csvEscape(r[k[1]])).join(','))].join('\r\n'))}
 $('#exportCases').addEventListener('click',()=>{
- const keys=[['案件ID','id'],['医薬品名','drugName'],['成分名','ingredient'],['規格','strength'],['コード','code'],['事象種別','type'],['把握日','issueDate'],['期限','deadline'],['在庫数','stock'],['在庫消尽見込日','stockoutDate'],['代替候補','alternatives'],['決定薬','selectedAlternative'],['状況','status'],['担当者','owner'],['決定者','decisionMaker'],['切替予定日','switchDate'],['決定理由','decisionReason'],['備考','notes']];
- const exportRows=state.cases.map(c=>{const row={...c};const legacyNames=legacyAlternativeNames(c);for(let i=1;i<=4;i++){row[`quoteAlt${i}Name`]=quoteValue(c,i,'Name')||legacyNames[i-1]||'';for(const supplier of quoteSuppliers){const base=`quoteAlt${i}${supplier.key}`;row[base]=quoteValue(c,i,supplier.key);row[`${base}Unit`]=quoteMetaValue(c,i,supplier.key,'unit');row[`${base}Expiry`]=quoteMetaValue(c,i,supplier.key,'expiry');row[`${base}QuoteDate`]=quoteMetaValue(c,i,supplier.key,'quoteDate');row[`${base}EnteredBy`]=quoteMetaValue(c,i,supplier.key,'enteredBy');}}return row;});
- for(let i=1;i<=4;i++){keys.push([`代替候補${i}`,`quoteAlt${i}Name`]);for(const supplier of quoteSuppliers){const base=`quoteAlt${i}${supplier.key}`;keys.push([`候補${i}_${supplier.label}_見積価格円`,base],[`候補${i}_${supplier.label}_単位`,`${base}Unit`],[`候補${i}_${supplier.label}_見積有効期限`,`${base}Expiry`],[`候補${i}_${supplier.label}_見積取得日`,`${base}QuoteDate`],[`候補${i}_${supplier.label}_入力者`,`${base}EnteredBy`]);}}
+ const keys=[['案件ID','id'],['医薬品名','drugName'],['成分名','ingredient'],['規格','strength'],['コード','code'],['事象種別','type'],['把握日','issueDate'],['期限','deadline'],['在庫数','stock'],['在庫消尽見込日','stockoutDate'],['代替候補','alternatives'],['決定薬','selectedAlternative'],['状況','status'],['担当者','owner'],['決定者','decisionMaker'],['切替予定日','switchDate'],['決定理由','decisionReason'],['備考','notes'],['見積入力者（全見積共通）','quoteEnteredBy']];
+ const exportRows=state.cases.map(c=>{const row={...c,quoteEnteredBy:quoteEnteredByValue(c)};const legacyNames=legacyAlternativeNames(c);for(let i=1;i<=4;i++){row[`quoteAlt${i}Name`]=quoteValue(c,i,'Name')||legacyNames[i-1]||'';for(const supplier of quoteSuppliers){const base=`quoteAlt${i}${supplier.key}`;row[base]=quoteValue(c,i,supplier.key);row[`${base}Unit`]=quoteMetaValue(c,i,supplier.key,'unit');row[`${base}Expiry`]=quoteMetaValue(c,i,supplier.key,'expiry');row[`${base}QuoteDate`]=quoteMetaValue(c,i,supplier.key,'quoteDate');}}return row;});
+ for(let i=1;i<=4;i++){keys.push([`代替候補${i}`,`quoteAlt${i}Name`]);for(const supplier of quoteSuppliers){const base=`quoteAlt${i}${supplier.key}`;keys.push([`候補${i}_${supplier.label}_見積価格円`,base],[`候補${i}_${supplier.label}_単位`,`${base}Unit`],[`候補${i}_${supplier.label}_見積有効期限`,`${base}Expiry`],[`候補${i}_${supplier.label}_見積取得日`,`${base}QuoteDate`]);}}
  keys.push(['更新日','updatedAt']);exportCsv(keys,exportRows,'対応案件_'+today()+'.csv')
 });
 $('#exportPurchases').addEventListener('click',()=>exportCsv([['記録ID','id'],['購入日','date'],['医薬品名','drugName'],['規格','strength'],['購入先','supplier'],['購入理由','reason'],['詳細','reasonDetail'],['購入数量','quantity'],['単位','unit'],['単価','unitPrice'],['購入金額','totalCost'],['使用件数','useCount'],['患者数集計値','patientCount'],['残数','remaining'],['評価','evaluation'],['担当者','owner'],['関連案件ID','linkedCase'],['備考','notes']],state.purchases,'臨時購入_'+today()+'.csv'));
@@ -300,7 +314,7 @@ $('#backupJson').addEventListener('click',()=>download('薬剤部ナレッジ管
 $('#restoreJson').addEventListener('click',()=>$('#restoreJsonFile').click());$('#restoreJsonFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const obj=JSON.parse(await file.text());if(!Array.isArray(obj.cases)||!Array.isArray(obj.purchases)||!Array.isArray(obj.history))throw new Error('形式が違います');if(!confirm('現在のデータを読み込んだバックアップの内容に置き換えます。事前に現在のデータもバックアップしましたか？'))return;state={version:1,cases:obj.cases,purchases:obj.purchases,history:obj.history};saveAndRender('バックアップを復元しました');}catch(err){alert('復元できませんでした。対応するJSONバックアップを選択してください。')}finally{e.target.value=''}});
 $('#importCases').addEventListener('click',()=>$('#importCasesFile').click());
 function parseCsv(text){text=text.replace(/^\uFEFF/,'');const rows=[];let row=[],cell='',quoted=false;for(let i=0;i<text.length;i++){const ch=text[i];if(quoted){if(ch==='"'&&text[i+1]==='"'){cell+='"';i++}else if(ch==='"')quoted=false;else cell+=ch;}else{if(ch==='"')quoted=true;else if(ch===','){row.push(cell);cell=''}else if(ch==='\n'){row.push(cell.replace(/\r$/,''));rows.push(row);row=[];cell=''}else cell+=ch;}}if(cell.length||row.length){row.push(cell.replace(/\r$/,''));rows.push(row)}return rows.filter(r=>r.some(c=>c.trim()!==''))}
-$('#importCasesFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const rows=parseCsv(await file.text());if(rows.length<2)throw new Error('データ行がありません');const heads=rows[0].map(h=>h.trim());const mapping={'医薬品名':'drugName','成分名':'ingredient','規格':'strength','コード':'code','薬価基準収載コード等（任意）':'code','事象種別':'type','事象の種類':'type','把握日':'issueDate','事象を把握した日':'issueDate','期限':'deadline','経過措置期限':'deadline','在庫数':'stock','院内在庫数':'stock','在庫消尽見込日':'stockoutDate','代替候補':'alternatives','決定薬':'selectedAlternative','決定した代替薬':'selectedAlternative','状況':'status','対応状況':'status','担当者':'owner','決定者':'decisionMaker','最終決定者':'decisionMaker','切替予定日':'switchDate','決定理由':'decisionReason','備考':'notes'};for(let qi=1;qi<=4;qi++){mapping[`代替候補${qi}`]=`quoteAlt${qi}Name`;for(const supplier of quoteSuppliers){const b=`quoteAlt${qi}${supplier.key}`;mapping[`候補${qi}_${supplier.label}_見積価格円`]=b;mapping[`候補${qi}_${supplier.label}_単位`]=`${b}Unit`;mapping[`候補${qi}_${supplier.label}_見積有効期限`]=`${b}Expiry`;mapping[`候補${qi}_${supplier.label}_見積取得日`]=`${b}QuoteDate`;mapping[`候補${qi}_${supplier.label}_入力者`]=`${b}EnteredBy`;}}const adds=[];for(const row of rows.slice(1)){const item={id:uid(),createdAt:now(),updatedAt:now(),status:'未着手',type:'その他',sample:false};heads.forEach((h,i)=>{const key=mapping[h];if(key)item[key]=row[i]||''});if(!item.drugName?.trim())continue;if(!statusList.includes(item.status))item.status='未着手';if(!caseTypes.includes(item.type))item.type='その他';adds.push(item)}if(!adds.length)throw new Error('医薬品名のある行が見つかりません');if(!confirm(`${adds.length}件の対応案件を新規登録します。続けますか？（既存案件との重複チェックは行いません）`))return;state.cases.unshift(...adds);adds.forEach(c=>logEvent('案件登録',c.drugName,c.id,'CSVから対応案件を登録','CSVインポート','未入力'));saveAndRender(`${adds.length}件を取り込みました`);switchTab('cases')}catch(err){alert('CSVを取り込めませんでした。UTF-8のCSVと列名を確認してください。\n'+err.message)}finally{e.target.value=''}});
+$('#importCasesFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const rows=parseCsv(await file.text());if(rows.length<2)throw new Error('データ行がありません');const heads=rows[0].map(h=>h.trim());const mapping={'医薬品名':'drugName','成分名':'ingredient','規格':'strength','コード':'code','薬価基準収載コード等（任意）':'code','事象種別':'type','事象の種類':'type','把握日':'issueDate','事象を把握した日':'issueDate','期限':'deadline','経過措置期限':'deadline','在庫数':'stock','院内在庫数':'stock','在庫消尽見込日':'stockoutDate','代替候補':'alternatives','決定薬':'selectedAlternative','決定した代替薬':'selectedAlternative','状況':'status','対応状況':'status','担当者':'owner','決定者':'decisionMaker','最終決定者':'decisionMaker','切替予定日':'switchDate','決定理由':'decisionReason','備考':'notes','見積入力者（全見積共通）':'quoteEnteredBy'};for(let qi=1;qi<=4;qi++){mapping[`代替候補${qi}`]=`quoteAlt${qi}Name`;for(const supplier of quoteSuppliers){const b=`quoteAlt${qi}${supplier.key}`;mapping[`候補${qi}_${supplier.label}_見積価格円`]=b;mapping[`候補${qi}_${supplier.label}_単位`]=`${b}Unit`;mapping[`候補${qi}_${supplier.label}_見積有効期限`]=`${b}Expiry`;mapping[`候補${qi}_${supplier.label}_見積取得日`]=`${b}QuoteDate`;mapping[`候補${qi}_${supplier.label}_入力者`]=`${b}EnteredBy`;}}const adds=[];for(const row of rows.slice(1)){const item={id:uid(),createdAt:now(),updatedAt:now(),status:'未着手',type:'その他',sample:false};heads.forEach((h,i)=>{const key=mapping[h];if(key)item[key]=row[i]||''});item.quoteEnteredBy=quoteEnteredByValue(item);if(!item.drugName?.trim())continue;if(!statusList.includes(item.status))item.status='未着手';if(!caseTypes.includes(item.type))item.type='その他';adds.push(item)}if(!adds.length)throw new Error('医薬品名のある行が見つかりません');if(!confirm(`${adds.length}件の対応案件を新規登録します。続けますか？（既存案件との重複チェックは行いません）`))return;state.cases.unshift(...adds);adds.forEach(c=>logEvent('案件登録',c.drugName,c.id,'CSVから対応案件を登録','CSVインポート','未入力'));saveAndRender(`${adds.length}件を取り込みました`);switchTab('cases')}catch(err){alert('CSVを取り込めませんでした。UTF-8のCSVと列名を確認してください。\n'+err.message)}finally{e.target.value=''}});
 $('#clearSamples').addEventListener('click',()=>{if(!confirm('サンプルデータだけを削除します。サンプルデータに対して行った編集記録も識別できる範囲で削除します。続けますか？'))return;const ids=new Set([...state.cases.filter(x=>x.sample).map(x=>x.id),...state.purchases.filter(x=>x.sample).map(x=>x.id)]);const drugs=new Set([...state.cases.filter(x=>x.sample).map(x=>x.drugName),...state.purchases.filter(x=>x.sample).map(x=>x.drugName)]);state.cases=state.cases.filter(x=>!x.sample);state.purchases=state.purchases.filter(x=>!x.sample);state.history=state.history.filter(h=>!h.sample&&!ids.has(h.relatedId)&&!drugs.has(h.drugName));saveAndRender('サンプルデータを削除しました')});
 $('#resetAll').addEventListener('click',()=>{if(!confirm('対応案件・臨時購入・意思決定履歴をすべて削除します。この操作は元に戻せません。先にバックアップすることを推奨します。続けますか？'))return;if(!confirm('本当に全データを削除しますか？'))return;state={version:1,cases:[],purchases:[],history:[]};saveAndRender('全データを削除しました')});
 
