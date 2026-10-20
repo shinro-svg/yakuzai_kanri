@@ -21,7 +21,7 @@
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><div class="brand"><div class="logo" aria-hidden="true">＋</div><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></div><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">試作版 v0.2</span></div></div></header>
+<header class="topbar"><div class="top-inner"><div class="brand"><div class="logo" aria-hidden="true">＋</div><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></div><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">試作版 v0.4</span></div></div></header>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">▦　概要</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
 <section id="tab-dashboard">
@@ -81,12 +81,13 @@
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v0.3｜共有データベース・招待設定対応</div>
+<div class="footer">薬剤部ナレッジ管理 v0.4｜共有設定の再入力を抑制</div>
 </main>
 </div>
 
 <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modal-head"><h3 id="modalTitle">登録</h3><button class="icon-btn" id="closeModal" aria-label="閉じる">×</button></div><form id="modalForm"><div class="modal-body" id="modalBody"></div><div class="modal-foot"><button class="btn" type="button" id="cancelModal">キャンセル</button><div class="actions"><button class="btn primary" id="saveModal" type="submit">保存する</button></div></div></form></div></div>
 <div id="toast" role="status" aria-live="polite" style="position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#163f5d;color:#fff;border-radius:12px;padding:11px 17px;z-index:50;box-shadow:0 8px 25px #123f6333;transition:.2s;max-width:90vw;font-size:13px"></div>
+<script src="./app-config.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -193,7 +194,9 @@ $('#clearSamples').addEventListener('click',()=>{if(!confirm('サンプルデー
 $('#resetAll').addEventListener('click',()=>{if(!confirm('対応案件・臨時購入・意思決定履歴をすべて削除します。この操作は元に戻せません。先にバックアップすることを推奨します。続けますか？'))return;if(!confirm('本当に全データを削除しますか？'))return;state={version:1,cases:[],purchases:[],history:[]};saveAndRender('全データを削除しました')});
 
 // Shared cloud storage uses Supabase Auth + a Row-Level-Security protected JSON state row.
-let cloudConfig=readLocalObject(CLOUD_CONFIG_KEY,null);
+const bundledCloudConfig = (window.PHARMA_APP_CONFIG && typeof window.PHARMA_APP_CONFIG.url==='string' && typeof window.PHARMA_APP_CONFIG.key==='string' && window.PHARMA_APP_CONFIG.url.startsWith('https://') && window.PHARMA_APP_CONFIG.key && !/PASTE_|YOUR-PROJECT/i.test(window.PHARMA_APP_CONFIG.url + window.PHARMA_APP_CONFIG.key)) ? {url:window.PHARMA_APP_CONFIG.url.replace(/\/+$/,''),key:window.PHARMA_APP_CONFIG.key.trim()} : null;
+// ブラウザの保存データが消えても、app-config.jsに設定があれば接続先を復元します。
+let cloudConfig=readLocalObject(CLOUD_CONFIG_KEY,null) || bundledCloudConfig;
 let cloudSession=readLocalObject(CLOUD_SESSION_KEY,null);
 let lastSyncedState=null, lastRemoteUpdatedAt=null, pollHandle=null, cloudSaveChain=Promise.resolve(), cloudWritesPending=0;
 function readLocalObject(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch(_){return fallback}}
