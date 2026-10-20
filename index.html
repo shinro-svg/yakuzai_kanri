@@ -94,11 +94,11 @@
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v0.6｜5卸の価格・単位・有効期限・取得日・入力者を記録</div>
+<div class="footer">薬剤部ナレッジ管理 v0.7｜フォーム誤閉じ防止・入力者欄の初期値空欄</div>
 </main>
 </div>
 
-<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modal-head"><h3 id="modalTitle">登録</h3><button class="icon-btn" id="closeModal" aria-label="閉じる">×</button></div><form id="modalForm"><div class="modal-body" id="modalBody"></div><div class="modal-foot"><button class="btn" type="button" id="cancelModal">キャンセル</button><div class="actions"><button class="btn primary" id="saveModal" type="submit">保存する</button></div></div></form></div></div>
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modal-head"><h3 id="modalTitle">登録</h3></div><form id="modalForm"><div class="modal-body" id="modalBody"></div><div class="modal-foot"><button class="btn" type="button" id="cancelModal">キャンセル</button><div class="actions"><button class="btn primary" id="saveModal" type="submit">保存する</button></div></div></form></div></div>
 <div id="toast" role="status" aria-live="polite" style="position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#163f5d;color:#fff;border-radius:12px;padding:11px 17px;z-index:50;box-shadow:0 8px 25px #123f6333;transition:.2s;max-width:90vw;font-size:13px"></div>
 <script src="./app-config.js"></script>
 <script>
@@ -172,7 +172,7 @@ function renderAll(){renderDashboard();renderCases();renderPurchases();renderHis
 const backdrop=$('#modalBackdrop');let modalKind='',editingId=null;
 function openModal(title,html,kind,id){modalKind=kind;editingId=id||null;$('#modalTitle').textContent=title;$('#modalBody').innerHTML=html;backdrop.classList.add('open');document.body.style.overflow='hidden';setTimeout(()=>$('#modalBody input:not([type=hidden]),#modalBody select,#modalBody textarea')?.focus(),30)}
 function closeModal(){backdrop.classList.remove('open');document.body.style.overflow='';$('#modalBody').innerHTML='';modalKind='';editingId=null;}
-$('#closeModal').addEventListener('click',closeModal);$('#cancelModal').addEventListener('click',closeModal);backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&backdrop.classList.contains('open'))closeModal()});
+$('#cancelModal').addEventListener('click',closeModal);
 function val(obj,k){return esc(obj?.[k]??'')}
 function inputField(label,name,value='',type='text',extra=''){return `<div class="field"><label for="f_${name}">${label}</label><input id="f_${name}" name="${name}" type="${type}" value="${val({v:value},'v')}" ${extra}></div>`}
 function selectField(label,name,options,value=''){return `<div class="field"><label for="f_${name}">${label}</label><select id="f_${name}" name="${name}">${options.map(o=>`<option ${o===value?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`}
@@ -222,7 +222,7 @@ function quoteCandidateMarkup(c,index,legacyNames){
    <div class="field"><label for="f_${base}Unit">単位（例：円/箱）</label><input id="f_${base}Unit" name="${base}Unit" type="text" value="${val({v:unit},'v')}" placeholder="円/箱"></div>
    <div class="field"><label for="f_${base}Expiry">見積有効期限</label><input id="f_${base}Expiry" name="${base}Expiry" type="date" value="${val({v:expiry},'v')}"></div>
    <div class="field"><label for="f_${base}QuoteDate">見積取得日</label><input id="f_${base}QuoteDate" name="${base}QuoteDate" type="date" value="${val({v:quoteDate},'v')}"></div>
-   <div class="field quote-wide"><label for="f_${base}EnteredBy">入力者</label><input id="f_${base}EnteredBy" name="${base}EnteredBy" type="text" value="${val({v:enteredBy},'v')}" placeholder="価格入力時にログインメールを補完"></div>
+   <div class="field quote-wide"><label for="f_${base}EnteredBy">入力者</label><input id="f_${base}EnteredBy" name="${base}EnteredBy" type="text" value="${val({v:enteredBy},'v')}"></div>
   </div></div>`;
  }).join('');
  return `<div class="quote-candidate"><div class="quote-candidate-title">代替薬候補 ${index}</div><div class="field quote-candidate-name"><label for="f_quoteAlt${index}Name">候補薬名・規格</label><input id="f_quoteAlt${index}Name" name="quoteAlt${index}Name" type="text" value="${val({v:name},'v')}" placeholder="薬剤師が候補を入力"></div><div class="quote-input-grid">${vendors}</div></div>`;
@@ -235,13 +235,13 @@ function getQuoteCount(c){
 function openCaseModal(id=null){
  const c=state.cases.find(x=>x.id===id)||{};const isEdit=!!id;const legacyNames=legacyAlternativeNames(c);
  const quoteInputs=[1,2,3,4].map(i=>quoteCandidateMarkup(c,i,legacyNames)).join('');
- const html=`<div class="notice">ここでは医薬品の問題と薬剤部内の対応方針を記録します。代替薬や切替の最終判断は、施設の承認手順に従ってください。</div><div class="form-section">医薬品・問題の情報</div><div class="form-grid">${inputField('<span class="required">*</span> 医薬品名','drugName',c.drugName||'','text','required')}${inputField('成分名','ingredient',c.ingredient||'')}${inputField('規格・剤形','strength',c.strength||'')}${inputField('薬価基準収載コード等（任意）','code',c.code||'')}${selectField('事象の種類','type',caseTypes,c.type||'経過措置')}${inputField('事象を把握した日','issueDate',c.issueDate||today(),'date')}${inputField('経過措置期限','deadline',c.deadline||'','date')}${inputField('院内在庫数（数量のみ）','stock',c.stock??'','number','min="0" step="any"')}${inputField('在庫消尽見込日','stockoutDate',c.stockoutDate||'','date')}${inputField('切替予定日','switchDate',c.switchDate||'','date')}</div><div class="form-section">代替薬候補と卸5社の見積もり</div><div class="notice">薬剤師が候補薬名・規格を登録し、SPDが卸ごとの見積情報を入力します。候補は最大4剤、卸5社で最大20件です。価格の単位、見積有効期限、取得日、入力者も記録してください。価格入力時、ログイン中のメールアドレスと当日の日付を入力者・取得日に自動補完します（必要に応じて編集できます）。</div><div class="quote-subtitle">未取得の見積情報は空欄のままにしてください。価格単位や税込・税別条件は卸間で比較できるよう確認してください。</div>${quoteInputs}<div class="form-section">決定・対応計画</div><div class="form-grid">${inputField('決定した代替薬','selectedAlternative',c.selectedAlternative||'')}${selectField('対応状況','status',statusList,c.status||'未着手')}${inputField('担当者','owner',c.owner||'')}${inputField('最終決定者','decisionMaker',c.decisionMaker||'')}${textareaField('決定理由・検討内容','decisionReason',c.decisionReason||'','full')}${textareaField('備考・関連部署への連絡状況','notes',c.notes||'','full')}</div><div class="form-note">在庫数は自動で在庫管理システムと連動しません。手入力の参考値です。見積価格は入力者が確認した値を記録し、発注前に最新見積もりを再確認してください。</div>`;
+ const html=`<div class="notice">ここでは医薬品の問題と薬剤部内の対応方針を記録します。代替薬や切替の最終判断は、施設の承認手順に従ってください。</div><div class="form-section">医薬品・問題の情報</div><div class="form-grid">${inputField('<span class="required">*</span> 医薬品名','drugName',c.drugName||'','text','required')}${inputField('成分名','ingredient',c.ingredient||'')}${inputField('規格・剤形','strength',c.strength||'')}${inputField('薬価基準収載コード等（任意）','code',c.code||'')}${selectField('事象の種類','type',caseTypes,c.type||'経過措置')}${inputField('事象を把握した日','issueDate',c.issueDate||today(),'date')}${inputField('経過措置期限','deadline',c.deadline||'','date')}${inputField('院内在庫数（数量のみ）','stock',c.stock??'','number','min="0" step="any"')}${inputField('在庫消尽見込日','stockoutDate',c.stockoutDate||'','date')}${inputField('切替予定日','switchDate',c.switchDate||'','date')}</div><div class="form-section">代替薬候補と卸5社の見積もり</div><div class="notice">薬剤師が候補薬名・規格を登録し、SPDが卸ごとの見積情報を入力します。候補は最大4剤、卸5社で最大20件です。価格の単位、見積有効期限、取得日、入力者も記録してください。見積価格を変更すると、見積取得日は当日の日付を自動補完します。入力者欄は空欄のまま表示され、必要に応じて入力してください。</div><div class="quote-subtitle">未取得の見積情報は空欄のままにしてください。価格単位や税込・税別条件は卸間で比較できるよう確認してください。</div>${quoteInputs}<div class="form-section">決定・対応計画</div><div class="form-grid">${inputField('決定した代替薬','selectedAlternative',c.selectedAlternative||'')}${selectField('対応状況','status',statusList,c.status||'未着手')}${inputField('担当者','owner',c.owner||'')}${inputField('最終決定者','decisionMaker',c.decisionMaker||'')}${textareaField('決定理由・検討内容','decisionReason',c.decisionReason||'','full')}${textareaField('備考・関連部署への連絡状況','notes',c.notes||'','full')}</div><div class="form-note">在庫数は自動で在庫管理システムと連動しません。手入力の参考値です。見積価格は入力者が確認した値を記録し、発注前に最新見積もりを再確認してください。</div>`;
  openModal(isEdit?'対応案件を編集':'対応案件を登録',html,'case',id);
- // 新規の見積価格を変更した時点で、取得日とログイン利用者を補助入力します。必要に応じて手修正可能です。
+ // 見積価格を変更した場合は取得日だけを補助入力します。入力者欄は自動入力せず空欄のままにします。
  for(let i=1;i<=4;i++) for(const supplier of quoteSuppliers){
   const base=`quoteAlt${i}${supplier.key}`;
-  const price=$(`#f_${base}`), dateField=$(`#f_${base}QuoteDate`), enteredBy=$(`#f_${base}EnteredBy`);
-  if(price) price.addEventListener('change',()=>{if(String(price.value).trim()!==''){if(dateField)dateField.value=today();if(enteredBy&&cloudSession?.user?.email)enteredBy.value=cloudSession.user.email;}});
+  const price=$(`#f_${base}`), dateField=$(`#f_${base}QuoteDate`);
+  if(price) price.addEventListener('change',()=>{if(String(price.value).trim()!==''&&dateField&&!dateField.value)dateField.value=today();});
  }
 }
 function getForm(){return Object.fromEntries(new FormData($('#modalForm')).entries())}
