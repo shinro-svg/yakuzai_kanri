@@ -34,7 +34,7 @@
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><div class="brand"><div class="logo" aria-hidden="true">＋</div><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></div><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">試作版 v0.9.2</span></div></div></header>
+<header class="topbar"><div class="top-inner"><div class="brand"><div class="logo" aria-hidden="true">＋</div><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></div><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">試作版 v0.9.4</span></div></div></header>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">▦　概要</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
 <section id="tab-dashboard">
@@ -45,7 +45,7 @@
 </section>
 <section id="tab-cases" hidden>
 <div class="section-head"><div><h2>医薬品の対応案件</h2><p>経過措置・販売中止・供給問題などの対応状況と代替薬の判断を管理します。</p></div><div class="actions"><button class="btn" id="exportCases">CSV出力</button><button class="btn primary" id="addCase">＋ 対応案件を登録</button></div></div>
-<div class="toolbar"><div class="field search"><label for="caseSearch">キーワード検索</label><input id="caseSearch" placeholder="薬剤名、成分名、代替薬、担当者、理由など"></div><div class="field filter"><label for="caseStatusFilter">対応状況</label><select id="caseStatusFilter"><option value="">すべての状況</option><option>未着手</option><option>検討中</option><option>決定済み</option><option>切替中</option><option>完了</option></select></div><div class="field filter"><label for="caseTypeFilter">事象の種類</label><select id="caseTypeFilter"><option value="">すべての種類</option><option>経過措置</option><option>販売中止</option><option>限定出荷</option><option>供給停止・欠品</option><option>院内採用中止</option><option>その他</option></select></div></div>
+<div class="toolbar"><div class="field search"><label for="caseSearch">キーワード検索</label><input id="caseSearch" placeholder="薬剤名、成分名、代替薬、担当者、理由など"></div><div class="field filter"><label for="caseStatusFilter">対応状況</label><select id="caseStatusFilter"><option value="">すべての状況</option><option>未着手</option><option>検討中</option><option>見積済み</option><option>決定済み</option><option>切替中</option><option>完了</option></select></div><div class="field filter"><label for="caseTypeFilter">事象の種類</label><select id="caseTypeFilter"><option value="">すべての種類</option><option>経過措置</option><option>販売中止</option><option>限定出荷</option><option>供給停止・欠品</option><option>院内採用中止</option><option>その他</option></select></div></div>
 <div class="table-wrap"><table class="data-table"><thead><tr><th>医薬品・事象</th><th>期限・切替日</th><th>代替薬</th><th>対応状況</th><th>担当者</th><th>更新日</th><th>操作</th></tr></thead><tbody id="casesTable"></tbody></table></div><div id="caseCount" class="text-sm muted" style="margin-top:9px"></div>
 </section>
 <section id="tab-purchases" hidden>
@@ -94,7 +94,7 @@
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v0.9.2｜院内在庫確認日・切替日管理</div>
+<div class="footer">薬剤部ナレッジ管理 v0.9.4｜見積済み対応・自動統合・院内在庫確認日・切替日管理</div>
 </main>
 </div>
 
@@ -113,7 +113,7 @@ const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slic
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate=d=>d?String(d).replaceAll('-','/').slice(0,10):'—';
 const yen=n=>n===''||n===null||n===undefined||Number.isNaN(Number(n))?'—':Number(n).toLocaleString('ja-JP')+'円';
-const statusList=['未着手','検討中','決定済み','切替中','完了'];
+const statusList=['未着手','検討中','見積済み','決定済み','切替中','完了'];
 const caseTypes=['経過措置','販売中止','限定出荷','供給停止・欠品','院内採用中止','その他'];
 const evalList=['評価前','一時購入で終了','再購入を検討','正式採用を検討','対応完了'];
 function sampleState(){
@@ -143,10 +143,10 @@ function toast(s){const t=$('#toast');t.textContent=s;t.style.opacity='1';t.styl
 function saveAndRender(msg){persist();renderAll();if(isCloudReady()){setCloudStatus('● 同期中', '変更を共有データベースへ保存しています。');queueCloudSave(msg);}else if(msg)toast(msg+'（この端末に保存）')}
 function switchTab(name){$$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));$$('main section[id^="tab-"]').forEach(s=>s.hidden=s.id!=='tab-'+name);if(name==='cases')renderCases();if(name==='purchases')renderPurchases();if(name==='history')renderHistory();}
 $$('.nav button').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));$$('[data-go]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.go)));
-function pillStatus(s){let c='gray';if(['未着手'].includes(s))c='red';else if(['検討中','切替中'].includes(s))c='amber';else if(['決定済み'].includes(s))c='blue';else if(['完了'].includes(s))c='green';return `<span class="pill ${c}">${esc(s||'未設定')}</span>`}
+function pillStatus(s){let c='gray';if(['未着手'].includes(s))c='red';else if(['検討中','切替中'].includes(s))c='amber';else if(['見積済み','決定済み'].includes(s))c='blue';else if(['完了'].includes(s))c='green';return `<span class="pill ${c}">${esc(s||'未設定')}</span>`}
 function pillType(s){return `<span class="pill gray">${esc(s||'未設定')}</span>`}
 function dateLevel(c){if(!c.deadline||c.status==='完了')return '';const days=Math.ceil((new Date(c.deadline+'T23:59:59')-new Date())/86400000);if(days<0)return `<span class="pill red">期限超過 ${Math.abs(days)}日</span>`;if(days<=30)return `<span class="pill amber">残り${days}日</span>`;return `<span class="pill gray">残り${days}日</span>`}
-function caseSortPriority(a,b){const pr=c=>c.status==='完了'?9:(!c.selectedAlternative?0:c.status==='未着手'?1:c.status==='検討中'?2:c.status==='決定済み'?3:4);const p=pr(a)-pr(b);if(p!==0)return p;return (a.deadline||a.stockoutDate||'9999').localeCompare(b.deadline||b.stockoutDate||'9999')}
+function caseSortPriority(a,b){const pr=c=>c.status==='完了'?9:(!c.selectedAlternative?0:c.status==='未着手'?1:c.status==='検討中'?2:c.status==='見積済み'?3:c.status==='決定済み'?4:5);const p=pr(a)-pr(b);if(p!==0)return p;return (a.deadline||a.stockoutDate||'9999').localeCompare(b.deadline||b.stockoutDate||'9999')}
 function renderDashboard(){const active=state.cases.filter(c=>c.status!=='完了');const undecided=active.filter(c=>!c.selectedAlternative);const near=active.filter(c=>c.deadline&&Math.ceil((new Date(c.deadline+'T23:59:59')-new Date())/86400000)<=30).length;const evaluating=state.purchases.filter(p=>['評価前','再購入を検討','正式採用を検討'].includes(p.evaluation)).length;
  $('#stats').innerHTML=[['対応中の案件',active.length,'完了以外の案件',''],['代替薬が未決定',undecided.length,'対応中の案件のうち代替薬未設定','red'],['期限が30日以内・超過',near,'経過措置期限を登録した案件','red'],['臨時購入・評価中',evaluating,'購入後の評価が必要な記録','']].map(([l,v,h,c])=>`<div class="card stat"><div class="label">${esc(l)}</div><div class="value ${c}">${v}</div><div class="hint">${esc(h)}</div></div>`).join('');
  const urgent=active.slice().sort(caseSortPriority).filter(c=>!c.selectedAlternative||dateLevel(c).includes('red')||dateLevel(c).includes('amber')||['未着手','検討中'].includes(c.status)).slice(0,6);
@@ -394,7 +394,7 @@ async function loginCloud(email,password){if(!cloudConfig?.url||!cloudConfig?.ke
 async function cloudReadRow(){const r=await cloudFetch('/rest/v1/pharma_shared_state?select=id,data,revision,updated_at,updated_by&id=eq.shared&limit=1');const rows=await r.json();if(rows.length)return rows[0];const blank=emptyState();const created=await cloudFetch('/rest/v1/pharma_shared_state',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({id:'shared',data:blank,revision:0,updated_at:now(),updated_by:cloudSession.user.id})});const arr=await created.json();if(arr.length)return arr[0];const reread=await cloudFetch('/rest/v1/pharma_shared_state?select=id,data,revision,updated_at,updated_by&id=eq.shared&limit=1');return (await reread.json())[0]}
 function mergeCollection(baseList,localList,remoteList){const bm=new Map((baseList||[]).map(x=>[String(x.id),x]));const lm=new Map((localList||[]).map(x=>[String(x.id),x]));const rm=new Map((remoteList||[]).map(x=>[String(x.id),x]));const out=new Map(rm);let conflicts=0;
   // Local additions and edits are applied to the latest remote state. When both sides changed the same record, keep the later update timestamp.
-  for(const [id,l] of lm){const b=bm.get(id),r=rm.get(id);if(!b){if(!r)out.set(id,l);else if(!equalJson(l,r)){const lt=String(l.updatedAt||l.date||l.createdAt||'');const rt=String(r.updatedAt||r.date||r.createdAt||'');if(lt>rt)out.set(id,l);conflicts++;}}else if(!equalJson(l,b)){if(!r)out.set(id,l);else if(equalJson(r,b))out.set(id,l);else{const lt=String(l.updatedAt||l.date||l.createdAt||'');const rt=String(r.updatedAt||r.date||r.createdAt||'');if(lt>=rt)out.set(id,l);conflicts++;}}}
+  for(const [id,l] of lm){const b=bm.get(id),r=rm.get(id);if(!b){if(!r)out.set(id,l);else if(!equalJson(l,r)){const lt=String(l.updatedAt||l.date||l.createdAt||'');const rt=String(r.updatedAt||r.date||r.createdAt||'');if(lt>rt)out.set(id,l);conflicts++;}}else if(!equalJson(l,b)){if(!r)out.set(id,l);else if(equalJson(r,b))out.set(id,l);else{const lt=String(l.updatedAt||l.date||l.createdAt||'');const rt=String(r.updatedAt||r.date||r.createdAt||'');if(lt>rt)out.set(id,l);conflicts++;}}}
   // A local deletion is honoured only if the remote item has not changed since the common base.
   for(const [id,b] of bm){if(!lm.has(id)){const r=rm.get(id);if(r&&equalJson(r,b))out.delete(id);else if(r&&!equalJson(r,b))conflicts++;}}
   return {items:Array.from(out.values()),conflicts};}
@@ -411,7 +411,25 @@ async function pushSharedState(msg=''){if(!isCloudReady())return;cloudWritesPend
 function queueCloudSave(msg){cloudSaveChain=cloudSaveChain.then(()=>pushSharedState(msg)).catch(e=>{setCloudStatus('● 同期エラー',e.message,true)});return cloudSaveChain}
 async function refreshFromCloud(force=false){if(!isCloudReady()||cloudWritesPending||$('#modalBackdrop').classList.contains('open'))return;try{const row=await cloudReadRow();if(row.updated_at===lastRemoteUpdatedAt&&!force)return;if(lastSyncedState&&!equalJson(state,lastSyncedState)){await queueCloudSave('');return}adoptRemoteState(row);setCloudStatus('● 共有接続中','他の端末の更新を反映しました。最終同期：'+new Date(row.updated_at).toLocaleTimeString('ja-JP'));}catch(e){setCloudStatus('● 同期エラー','共有データを更新できませんでした：'+e.message,true)}}
 function startCloudPolling(){if(pollHandle)clearInterval(pollHandle);pollHandle=setInterval(()=>refreshFromCloud(false),10000);}
-async function syncLoginState(){const row=await cloudReadRow();const remote=normalizeState(row.data);const local=withoutSamples(state);if(isEmptyState(remote)&&hasRealLocalData(local)){if(confirm('共有データベースは空です。この端末にあるサンプル以外のデータを共有先へ移行しますか？')){state=local;lastSyncedState=emptyState();lastRemoteUpdatedAt=row.updated_at||null;const migrated=await pushSharedState('この端末のデータを共有先へ移行しました');if(!migrated){startCloudPolling();return}}else{endLoginKeepLocal('移行は行わず、この端末のデータを保持しました。共有機能を使うには、再度ログインして移行を選んでください。');return}}else if(!isEmptyState(remote)&&hasRealLocalData(local)&&hasLocalDifferences(local,remote)){if(confirm('共有データと、この端末にだけある、または内容が異なる記録があります。サンプル以外の端末データを共有データへ統合しますか？')){state=local;lastSyncedState=emptyState();lastRemoteUpdatedAt=row.updated_at||null;const merged=await pushSharedState('端末データを共有データへ統合しました');if(!merged){startCloudPolling();return}}else{endLoginKeepLocal('端末データを保持するため、共有ログインを解除しました。共有データを使う場合は、JSONバックアップ後に再ログインしてください。');return}}else adoptRemoteState(row);startCloudPolling();setCloudStatus('● 共有接続中','ログイン中：'+(cloudSession.user?.email||'利用者')+'。同じ共有設定の端末と自動同期します。')}
+async function syncLoginState(){
+ const row=await cloudReadRow();
+ const remote=normalizeState(row.data);
+ const local=withoutSamples(state);
+ // ログイン時に確認ダイアログを出さず、サンプル以外の端末データを共有データへ自動統合する。
+ // 新規レコードは追加し、同一IDの内容が異なる場合は updatedAt 等の日時が新しい方を採用する。
+ if(hasRealLocalData(local) && (isEmptyState(remote) || hasLocalDifferences(local,remote))){
+   state=local;
+   lastSyncedState=emptyState();
+   lastRemoteUpdatedAt=row.updated_at||null;
+   const msg=isEmptyState(remote)?'この端末の記録を共有データへ自動移行しました':'端末と共有先の記録を自動統合しました';
+   const ok=await pushSharedState(msg);
+   if(!ok){startCloudPolling();return;}
+ }else{
+   adoptRemoteState(row);
+ }
+ startCloudPolling();
+ setCloudStatus('● 共有接続中','ログイン中：'+(cloudSession.user?.email||'利用者')+'。同じ共有設定の端末と自動同期します。');
+}
 async function handleCloudLogin(){try{const email=$('#cloudEmail').value.trim(),password=$('#cloudPassword').value;if(!email||!password)throw new Error('メールアドレスとパスワードを入力してください');await loginCloud(email,password);await syncLoginState();$('#cloudPassword').value='';}catch(e){setCloudStatus('● 接続エラー',e.message,true);toast(e.message)}}
 async function handleCloudLogout(){if(!confirm('共有データからログアウトしますか？端末の共有データ表示を消去します。必要な場合は先にバックアップしてください。'))return;try{if(cloudSession?.access_token&&cloudConfig?.url)await fetch(cloudConfig.url+'/auth/v1/logout',{method:'POST',headers:{'apikey':cloudConfig.key,'Authorization':'Bearer '+cloudSession.access_token}})}catch(_){}if(pollHandle)clearInterval(pollHandle);pollHandle=null;cloudSession=null;lastSyncedState=null;lastRemoteUpdatedAt=null;localStorage.removeItem(CLOUD_SESSION_KEY);state=emptyState();persist();renderAll();setCloudStatus('● ログアウト中','ログアウトしました。共有データは再ログイン後に表示されます。');}
 $('#saveCloudConfig').addEventListener('click',()=>{try{const cfg=cleanConfigFromFields();const changed=!cloudConfig||cloudConfig.url!==cfg.url||cloudConfig.key!==cfg.key;if(changed&&cloudSession){if(!confirm('接続先が変わります。現在の共有セッションからログアウトします。続けますか？'))return;cloudSession=null;localStorage.removeItem(CLOUD_SESSION_KEY);if(pollHandle)clearInterval(pollHandle);pollHandle=null;}cloudConfig=cfg;localStorage.setItem(CLOUD_CONFIG_KEY,JSON.stringify(cloudConfig));if(pendingInvite){$('#setInvitePassword').disabled=false;$('#inviteSetupStatus').textContent='接続情報を保存しました。新しいパスワードを設定してください。';}setCloudStatus(cloudSession?'● 共有接続中':'● 接続設定済み',cloudSession?'共有設定を更新しました。':'接続情報を保存しました。次に招待された利用者でログインしてください。');toast('共有接続情報を保存しました');}catch(e){setCloudStatus('● 設定エラー',e.message,true);toast(e.message)}});
