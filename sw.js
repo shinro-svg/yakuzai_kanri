@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pharma-stock-pwa-v097-responsive';
+const CACHE_NAME = 'pharma-stock-pwa-v098-alternatives-list';
 const APP_FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './app-config.js'];
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)).then(() => self.skipWaiting()));
