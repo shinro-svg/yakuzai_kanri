@@ -39,7 +39,7 @@
 @media(max-width:640px){.topbar{padding:16px}.top-inner{align-items:flex-start}.logo{width:40px;height:40px}.wrap{padding:13px 11px 30px}.nav button{padding:10px 12px}.section-head h2{font-size:19px}.stats{gap:9px}.stat{padding:13px}.stat .value{font-size:26px}.form-grid,.settings-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.modal-backdrop{padding:8px}.modal{max-height:96vh;border-radius:14px}.modal-head,.modal-body,.modal-foot{padding:15px}.history-item{grid-template-columns:1fr;gap:4px}.filter{width:100%}.search{min-width:100%}.toolbar .field{flex:1 1 100%}}
 @media print{.topbar{background:#fff;color:#000;padding:0 0 12px}.subhead{color:#555}.wrap{max-width:none;padding:0}.nav,.actions,.toolbar,.footer,.btn{display:none!important}.card{box-shadow:none;break-inside:avoid}.table-wrap{overflow:visible}.data-table{min-width:0;font-size:10px}.data-table th,.data-table td{padding:5px}.app section[hidden]{display:none!important}}
 
-/* v0.9.7: PC・スマートフォンの操作性を改善 */
+/* v0.9.9: PC・スマートフォンの操作性と代替薬候補表示を改善 */
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{overflow-wrap:anywhere}
 button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -171,11 +171,74 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 
+
+/* v0.9.9: On narrow screens, let the alternatives occupy the full row instead of the value column. */
+@media(max-width:640px){
+  .data-table tbody tr td.alternative-candidates-cell{
+    display:block!important;
+    width:100%;
+    padding:12px 0 14px;
+  }
+  .data-table tbody tr td.alternative-candidates-cell::before{
+    display:block;
+    width:100%;
+    padding:0 0 8px;
+    font-size:12px;
+  }
+  .alternative-candidates-cell .alternative-candidates{
+    display:block;
+    width:100%;
+    min-width:0;
+    margin:0;
+  }
+  .alternative-candidates-cell .alternative-candidates-label{
+    display:block;
+    margin:0 0 8px;
+    font-size:13px;
+    line-height:1.45;
+  }
+  .alternative-candidates-cell .alternative-candidate-list{
+    display:flex;
+    flex-direction:column;
+    width:100%;
+    min-width:0;
+    gap:0;
+  }
+  .alternative-candidates-cell .alternative-candidate-item{
+    display:grid;
+    grid-template-columns:26px minmax(0,1fr);
+    align-items:start;
+    gap:10px;
+    width:100%;
+    min-width:0;
+    padding:14px 8px;
+    border-top:1px solid #dfe7ed;
+    line-height:1.6;
+  }
+  .alternative-candidates-cell .alternative-candidate-item:first-child{border-top:0}
+  .alternative-candidates-cell .alternative-candidate-number{
+    display:block;
+    width:auto;
+    font-size:15px;
+    line-height:1.6;
+  }
+  .alternative-candidates-cell .alternative-candidate-name{
+    display:block;
+    width:100%;
+    min-width:0;
+    font-size:15px;
+    line-height:1.65;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    word-break:normal;
+  }
+}
+
 </style>
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><div class="brand"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></div><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">試作版 v0.9.7</span></div></div></header>
+<header class="topbar"><div class="top-inner"><div class="brand"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></div><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">試作版 v0.9.9</span></div></div></header>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">▦　概要</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
 <section id="tab-dashboard">
@@ -235,7 +298,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v0.9.7｜スマホ・PCレスポンシブ対応</div>
+<div class="footer">薬剤部ナレッジ管理 v0.9.9｜スマホ・PCレスポンシブ対応</div>
 </main>
 </div>
 
@@ -298,6 +361,7 @@ function applyResponsiveTableLabels(root=document){
     table.querySelectorAll('tbody tr').forEach(row=>Array.from(row.cells).forEach((cell,index)=>{
       if(cell.hasAttribute('colspan')) return;
       cell.setAttribute('data-label',headers[index]||'項目');
+      cell.classList.toggle('alternative-candidates-cell', !!cell.querySelector('.alternative-candidates'));
     }));
   });
 }
