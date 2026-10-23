@@ -251,7 +251,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.2</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.3</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
@@ -312,7 +312,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v1.0.2｜運用版・スマホ／PC対応</div>
+<div class="footer">薬剤部ナレッジ管理 v1.0.3｜運用版・スマホ／PC対応</div>
 </main>
 </div>
 
@@ -386,13 +386,13 @@ function applyResponsiveTableLabels(root=document){
 
 function renderDashboard(){
  const active=state.cases.filter(c=>c.status!=='完了');
- const quoted=active.filter(hasQuote);
- const unquoted=active.filter(c=>!hasQuote(c));
+ const quoted=active.filter(c=>c.status==='見積済み');
+ const unquoted=active.filter(c=>c.status!=='見積済み');
  const near=active.filter(isStockoutNear).length;
  const statItems=[
   {label:'対応中の案件',value:active.length,hint:'完了以外の案件',tone:'',action:'cases-active'},
-  {label:'見積もり済み',value:quoted.length,hint:'見積価格が1件以上入力された対応中の案件',tone:'',action:'cases-quoted'},
-  {label:'見積もり未',value:unquoted.length,hint:'見積価格がまだ入力されていない対応中の案件',tone:'red',action:'cases-unquoted'},
+  {label:'見積もり済み',value:quoted.length,hint:'対応状況が「見積済み」の未完了案件',tone:'',action:'cases-quoted'},
+  {label:'見積もり未',value:unquoted.length,hint:'対応状況が「見積済み」以外の未完了案件',tone:'red',action:'cases-unquoted'},
   {label:'在庫消尽見込みが30日以内・超過',value:near,hint:'在庫消尽見込日が本日から30日以内、または超過した案件',tone:'red',action:'cases-stockout-near'}
  ];
  $('#stats').innerHTML=statItems.map(item=>{const content=`<div class="label">${esc(item.label)}</div><div class="value ${item.tone}">${item.value}</div><div class="hint">${esc(item.hint)}<span class="stat-arrow" aria-hidden="true">　›</span></div>`;return `<button type="button" class="card stat stat-link" data-dashboard-action="${item.action}" aria-label="${esc(item.label)}の該当一覧を開く">${content}</button>`}).join('');
@@ -424,7 +424,7 @@ function renderAlternativeCandidates(c){
  if(!names.length)return '<div class="alternative-candidates"><div class="alternative-candidates-label">代替薬候補</div><div class="muted text-sm">未登録</div></div>';
  return `<div class="alternative-candidates"><div class="alternative-candidates-label">代替薬候補（${names.length}剤）</div><div class="alternative-candidate-list">${names.map((name,index)=>`<div class="alternative-candidate-item"><span class="alternative-candidate-number">${index+1}.</span><span class="alternative-candidate-name">${esc(name)}</span></div>`).join('')}</div></div>`;
 }
-function renderCases(){const q=$('#caseSearch').value.toLowerCase().trim(),status=$('#caseStatusFilter').value,type=$('#caseTypeFilter').value,stockoutFilter=$('#caseStockoutFilter').value;let list=state.cases.filter(c=>{const hay=[c.drugName,c.ingredient,c.strength,c.type,c.alternatives,c.selectedAlternative,c.prescriptionMasterStatus,c.ptCommitteeDecision?'薬事委員会決定事項あり':'薬事委員会決定事項なし',c.owner,c.decisionMaker,c.decisionReason,c.notes,...(c.alternativeQuotes||[]).map(q=>q.name)].join(' ').toLowerCase();const statusMatch=!status||(status==='__active__'&&c.status!=='完了')||(status==='__quoted__'&&c.status!=='完了'&&hasQuote(c))||(status==='__unquoted__'&&c.status!=='完了'&&!hasQuote(c))||c.status===status;const stockoutDays=daysUntilDate(c.stockoutDate);const stockoutMatch=!stockoutFilter||(stockoutFilter==='__near__'&&c.status!=='完了'&&stockoutDays!==null&&stockoutDays<=30)||(stockoutFilter==='__any__'&&stockoutDays!==null);return (!q||hay.includes(q))&&statusMatch&&(!type||c.type===type)&&stockoutMatch}).sort(caseSortPriority);
+function renderCases(){const q=$('#caseSearch').value.toLowerCase().trim(),status=$('#caseStatusFilter').value,type=$('#caseTypeFilter').value,stockoutFilter=$('#caseStockoutFilter').value;let list=state.cases.filter(c=>{const hay=[c.drugName,c.ingredient,c.strength,c.type,c.alternatives,c.selectedAlternative,c.prescriptionMasterStatus,c.ptCommitteeDecision?'薬事委員会決定事項あり':'薬事委員会決定事項なし',c.owner,c.decisionMaker,c.decisionReason,c.notes,...(c.alternativeQuotes||[]).map(q=>q.name)].join(' ').toLowerCase();const statusMatch=!status||(status==='__active__'&&c.status!=='完了')||(status==='__quoted__'&&c.status!=='完了'&&c.status==='見積済み')||(status==='__unquoted__'&&c.status!=='完了'&&c.status!=='見積済み')||c.status===status;const stockoutDays=daysUntilDate(c.stockoutDate);const stockoutMatch=!stockoutFilter||(stockoutFilter==='__near__'&&c.status!=='完了'&&stockoutDays!==null&&stockoutDays<=30)||(stockoutFilter==='__any__'&&stockoutDays!==null);return (!q||hay.includes(q))&&statusMatch&&(!type||c.type===type)&&stockoutMatch}).sort(caseSortPriority);
  $('#casesTable').innerHTML=list.length?list.map(c=>`<tr><td><div class="main-name">${esc(c.drugName)} ${c.sample?'<span class="pill gray">サンプル</span>':''}</div><div class="subline">${esc(c.ingredient||'成分未入力')} ・ ${esc(c.company||'会社名未入力')}</div><div class="subline">YJコード：${esc(c.code||'未入力')}</div></td><td>${pillType(c.type)}<div class="subline">${c.deadline?`経過措置期限：${fmtDate(c.deadline)}<div>${dateLevel(c)}</div>`:'経過措置期限：—'}</div>${c.stockCheckDate?`<div class="subline"><strong>院内在庫確認日：</strong>${esc(fmtDate(c.stockCheckDate))}</div>`:''}${c.stockoutDate?`<div class="subline">在庫消尽見込：${fmtDate(c.stockoutDate)}</div>`:''}${c.switchDate?`<div class="subline"><strong>切替日：</strong>${esc(fmtDate(c.switchDate))}</div>`:''}</td><td>${c.selectedAlternative?`<strong>${esc(c.selectedAlternative)}</strong>`:'<span class="muted">未決定</span>'}${renderAlternativeCandidates(c)}<div class="subline">処方マスター：<span class="pill ${c.prescriptionMasterStatus==='作成済み'?'green':c.prescriptionMasterStatus==='未作成'?'amber':'gray'}">${esc(c.prescriptionMasterStatus||'未確認')}</span></div><div class="quote-summary">見積入力：${getQuoteCount(c)}/24件</div></td><td>${pillStatus(c.status)}</td><td><span class="pill ${c.ptCommitteeDecision===true?'green':'gray'}">${c.ptCommitteeDecision===true?'決定事項あり':'決定事項なし'}</span></td><td>${esc(c.owner||'—')}<div class="subline">決定者：${esc(c.decisionMaker||'—')}</div></td><td>${fmtDate((c.updatedAt||'').slice(0,10))}</td><td><div class="actions"><button class="btn small" data-edit-case="${esc(c.id)}">編集</button><button class="btn small" data-log-case="${esc(c.id)}">メモ</button><button class="btn small danger" data-del-case="${esc(c.id)}">削除</button></div></td></tr>`).join(''):'<tr><td colspan="8"><div class="empty">該当する案件はありません。</div></td></tr>';
  $('#caseCount').textContent=`${list.length}件表示／全${state.cases.length}件`;
  $$('[data-edit-case]').forEach(b=>b.addEventListener('click',()=>openCaseModal(b.dataset.editCase)));$$('[data-log-case]').forEach(b=>b.addEventListener('click',()=>openHistoryModal({relatedId:b.dataset.logCase})));$$('[data-del-case]').forEach(b=>b.addEventListener('click',()=>deleteCase(b.dataset.delCase)));
