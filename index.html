@@ -251,7 +251,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.3</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.4</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
@@ -263,7 +263,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </section>
 <section id="tab-cases" hidden>
 <div class="section-head"><div><h2>医薬品の対応案件</h2><p>経過措置・販売中止・供給問題などの対応状況と代替薬の判断を管理します。</p></div><div class="actions"><button class="btn" id="exportCases">CSV出力</button><button class="btn primary" id="addCase">＋ 対応案件を登録</button></div></div>
-<div class="toolbar"><div class="field search"><label for="caseSearch">キーワード検索</label><input id="caseSearch" placeholder="薬剤名、成分名、代替薬、担当者、理由など"></div><div class="field filter"><label for="caseStatusFilter">対応状況</label><select id="caseStatusFilter"><option value="">すべての状況</option><option value="__active__">対応中（完了以外）</option><option value="__undecided__">代替薬未決定</option><option value="__decided__">代替薬決定済み</option><option>未着手</option><option>検討中</option><option>見積済み</option><option>仮決定</option><option>決定済み</option><option>切替中</option><option>完了</option></select></div><div class="field filter"><label for="caseStockoutFilter">在庫消尽見込</label><select id="caseStockoutFilter"><option value="">すべて</option><option value="__near__">30日以内・超過</option><option value="__any__">日付登録済み</option></select></div><div class="field filter"><label for="caseTypeFilter">事象の種類</label><select id="caseTypeFilter"><option value="">すべての種類</option><option>経過措置</option><option>販売中止</option><option>限定出荷</option><option>供給停止・欠品</option><option>院内採用中止</option><option>その他</option></select></div></div>
+<div class="toolbar"><div class="field search"><label for="caseSearch">キーワード検索</label><input id="caseSearch" placeholder="薬剤名、成分名、代替薬、担当者、理由など"></div><div class="field filter"><label for="caseStatusFilter">対応状況</label><select id="caseStatusFilter"><option value="">すべての状況</option><option value="__active__">対応中（完了以外）</option><option value="__quoted__">見積済み（未完了案件）</option><option value="__unquoted__">見積未（未完了案件）</option><option value="__undecided__">代替薬未決定</option><option value="__decided__">代替薬決定済み</option><option>未着手</option><option>検討中</option><option>見積済み</option><option>仮決定</option><option>決定済み</option><option>切替中</option><option>完了</option></select></div><div class="field filter"><label for="caseStockoutFilter">在庫消尽見込</label><select id="caseStockoutFilter"><option value="">すべて</option><option value="__near__">30日以内・超過</option><option value="__any__">日付登録済み</option></select></div><div class="field filter"><label for="caseTypeFilter">事象の種類</label><select id="caseTypeFilter"><option value="">すべての種類</option><option>経過措置</option><option>販売中止</option><option>限定出荷</option><option>供給停止・欠品</option><option>院内採用中止</option><option>その他</option></select></div></div>
 <div class="table-wrap"><table class="data-table"><thead><tr><th>医薬品・事象</th><th>期限・切替日</th><th>代替薬</th><th>対応状況</th><th>薬事委員会決定</th><th>担当者</th><th>更新日</th><th>操作</th></tr></thead><tbody id="casesTable"></tbody></table></div><div id="caseCount" class="text-sm muted" style="margin-top:9px"></div>
 </section>
 <section id="tab-purchases" hidden>
@@ -391,8 +391,8 @@ function renderDashboard(){
  const near=active.filter(isStockoutNear).length;
  const statItems=[
   {label:'対応中の案件',value:active.length,hint:'完了以外の案件',tone:'',action:'cases-active'},
-  {label:'見積もり済み',value:quoted.length,hint:'対応状況が「見積済み」の未完了案件',tone:'',action:'cases-quoted'},
-  {label:'見積もり未',value:unquoted.length,hint:'対応状況が「見積済み」以外の未完了案件',tone:'red',action:'cases-unquoted'},
+  {label:'見積済み',value:quoted.length,hint:'対応状況が「見積済み」の未完了案件',tone:'',action:'cases-quoted'},
+  {label:'見積未',value:unquoted.length,hint:'対応状況が「見積済み」以外の未完了案件',tone:'red',action:'cases-unquoted'},
   {label:'在庫消尽見込みが30日以内・超過',value:near,hint:'在庫消尽見込日が本日から30日以内、または超過した案件',tone:'red',action:'cases-stockout-near'}
  ];
  $('#stats').innerHTML=statItems.map(item=>{const content=`<div class="label">${esc(item.label)}</div><div class="value ${item.tone}">${item.value}</div><div class="hint">${esc(item.hint)}<span class="stat-arrow" aria-hidden="true">　›</span></div>`;return `<button type="button" class="card stat stat-link" data-dashboard-action="${item.action}" aria-label="${esc(item.label)}の該当一覧を開く">${content}</button>`}).join('');
