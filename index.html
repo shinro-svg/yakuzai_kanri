@@ -316,11 +316,88 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
   #tab-cases #casesTable .alternative-candidate-name{display:block!important;width:100%;min-width:0;white-space:normal!important;overflow:visible;overflow-wrap:anywhere!important;word-break:normal!important;font-size:14px;}
 }
 
+
+
+/* v1.0.8: slightly wider medicine column on desktop; clean, structured case cards on phones. */
+@media (min-width: 641px) {
+  #tab-cases .table-wrap { overflow-x: auto; }
+  #tab-cases #casesTable { table-layout: fixed; min-width: 1260px; }
+  /* Add room for the medicine name and take the same amount from alternatives. */
+  #tab-cases #casesTable th:nth-child(1),
+  #tab-cases #casesTable td:nth-child(1) { width: 225px; }
+  #tab-cases #casesTable th:nth-child(2),
+  #tab-cases #casesTable td:nth-child(2) { width: 225px; }
+  #tab-cases #casesTable th:nth-child(3),
+  #tab-cases #casesTable td:nth-child(3) { width: 315px; }
+  #tab-cases #casesTable th:nth-child(4),
+  #tab-cases #casesTable td:nth-child(4) { width: 105px; }
+  #tab-cases #casesTable th:nth-child(5),
+  #tab-cases #casesTable td:nth-child(5) { width: 135px; }
+  #tab-cases #casesTable th:nth-child(6),
+  #tab-cases #casesTable td:nth-child(6) { width: 95px; }
+  #tab-cases #casesTable th:nth-child(7),
+  #tab-cases #casesTable td:nth-child(7) { width: 160px; }
+}
+
+@media (max-width: 640px) {
+  /* Cases are rendered as one coherent mobile card per case, with notes attached below. */
+  #tab-cases .table-wrap { overflow: visible !important; border: 0; background: transparent; }
+  #tab-cases table.cases-table,
+  #tab-cases table.cases-table tbody,
+  #tab-cases #casesTable { display: block !important; width: 100% !important; min-width: 0 !important; }
+  #tab-cases table.cases-table { border-collapse: separate; border-spacing: 0; }
+  #tab-cases table.cases-table thead { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
+  #tab-cases #casesTable tr.case-main-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 14px;
+    width: 100%; min-width: 0; margin: 0 !important; padding: 8px 14px 0 !important;
+    background: #fff; border: 1px solid var(--line); border-bottom: 0;
+    border-radius: 14px 14px 0 0; box-shadow: 0 3px 12px rgba(22,52,75,.05); overflow: hidden;
+  }
+  #tab-cases #casesTable tr.case-main-row td {
+    display: block !important; grid-column: auto; width: auto !important; min-width: 0 !important; max-width: none !important;
+    padding: 10px 0 !important; border-bottom: 1px solid #edf1f4; overflow: visible; text-align: left;
+    font-size: 14px; line-height: 1.5; overflow-wrap: anywhere;
+  }
+  #tab-cases #casesTable tr.case-main-row td::before {
+    display: block !important; width: 100%; padding: 0 0 5px !important; margin: 0; content: attr(data-label);
+    color: var(--muted); font-size: 11px; font-weight: 800; line-height: 1.35; text-align: left;
+  }
+  #tab-cases #casesTable tr.case-main-row td:nth-child(1),
+  #tab-cases #casesTable tr.case-main-row td:nth-child(2),
+  #tab-cases #casesTable tr.case-main-row td:nth-child(3),
+  #tab-cases #casesTable tr.case-main-row td:nth-child(6),
+  #tab-cases #casesTable tr.case-main-row td:nth-child(7) { grid-column: 1 / -1; }
+  #tab-cases #casesTable tr.case-main-row td:nth-child(1) { padding-top: 8px !important; }
+  #tab-cases #casesTable tr.case-main-row td:nth-child(3) { padding-bottom: 12px !important; }
+  #tab-cases #casesTable tr.case-main-row td:nth-child(4),
+  #tab-cases #casesTable tr.case-main-row td:nth-child(5) { align-self: start; }
+  #tab-cases #casesTable tr.case-main-row td:nth-child(6) { padding-top: 9px !important; }
+  #tab-cases #casesTable tr.case-main-row td:nth-child(7) { border-bottom: 0; padding-top: 8px !important; padding-bottom: 12px !important; }
+  #tab-cases #casesTable .main-name { min-width: 0; font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
+  #tab-cases #casesTable .subline { font-size: 12px; line-height: 1.5; }
+  #tab-cases #casesTable .alternative-candidates { display: block; width: 100%; min-width: 0; margin: 4px 0 0; }
+  #tab-cases #casesTable .alternative-candidates-label { display: block; margin: 0 0 5px; font-size: 12px; line-height: 1.4; }
+  #tab-cases #casesTable .alternative-candidate-list { display: flex; flex-direction: column; width: 100%; min-width: 0; gap: 0; }
+  #tab-cases #casesTable .alternative-candidate-item { display: grid !important; grid-template-columns: 22px minmax(0,1fr); align-items: start; gap: 8px; width: 100%; min-width: 0; padding: 9px 0; white-space: normal !important; border-top: 1px solid #e7edf1; }
+  #tab-cases #casesTable .alternative-candidate-number { display: block; width: auto; font-size: 13px; line-height: 1.55; }
+  #tab-cases #casesTable .alternative-candidate-name { display: block !important; flex: initial; width: 100%; min-width: 0; font-size: 14px; line-height: 1.55; white-space: normal !important; overflow: visible !important; overflow-wrap: anywhere !important; word-break: normal !important; }
+  #tab-cases #casesTable .quote-summary { font-size: 12px; margin-top: 6px; }
+  #tab-cases #casesTable .actions { display: flex; flex-wrap: wrap; gap: 7px; width: 100%; }
+  #tab-cases #casesTable .actions .btn { flex: 1 1 calc(33.333% - 7px); min-width: 78px; }
+  #tab-cases #casesTable tr.case-notes-row { display: block !important; width: 100%; margin: 0 0 12px !important; padding: 0 14px 0 !important; background: #f7fafc; border: 1px solid var(--line); border-top: 1px solid #e3ebf0; border-radius: 0 0 14px 14px; box-shadow: 0 3px 12px rgba(22,52,75,.05); overflow: hidden; }
+  #tab-cases #casesTable tr.case-notes-row td.case-notes-full { display: block !important; width: 100% !important; min-width: 0 !important; max-width: none !important; padding: 11px 0 14px !important; margin: 0; background: transparent; border: 0; text-align: left; }
+  #tab-cases #casesTable tr.case-notes-row td.case-notes-full::before { display: none !important; content: none !important; }
+  #tab-cases #casesTable .case-notes-label { display: block; width: 100%; margin: 0 0 6px; font-size: 12px; font-weight: 800; }
+  #tab-cases #casesTable .notes-list-content { display: block; width: 100%; min-width: 0; font-size: 13px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; word-break: normal; }
+  #tab-cases #casesTable td[colspan] { display: block !important; width: 100%; text-align: center; }
+}
 </style>
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.7</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.8</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
@@ -381,7 +458,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v1.0.7｜運用版・スマホ／PC対応</div>
+<div class="footer">薬剤部ナレッジ管理 v1.0.8｜運用版・スマホ／PC対応</div>
 </main>
 </div>
 
