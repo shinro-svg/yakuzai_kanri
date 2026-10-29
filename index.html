@@ -453,7 +453,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.13</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.14</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="supplyTodos">☑　To Doリストまたは情報共有</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
@@ -520,7 +520,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v1.0.13｜運用版・スマホ／PC対応</div>
+<div class="footer">薬剤部ナレッジ管理 v1.0.14｜運用版・スマホ／PC対応</div>
 </main>
 </div>
 
@@ -688,11 +688,12 @@ function renderSupplyTodos(){
  const statusMatch=t=>!status||(status==='__open__'?t.status!=='完了':t.status===status);
  const masterMatch=t=>!master||(master==='__required_not_created__'?isAlternativeMasterPending(t):t.masterNeedStatus===master);
  const list=all.filter(t=>{const text=[t.infoGenre||'流通状況',t.drugName,t.ingredient,t.company,t.yjCode,t.supplyIssueType,t.supplyDetails,t.supplyOutlook,t.alternativePlan,t.nextAction,t.assignedTo,t.notes,t.sourceUrl].join(' ').toLowerCase();const itemGenre=['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況';return (!q||text.includes(q))&&(!genre||itemGenre===genre)&&statusMatch(t)&&(!priority||t.priority===priority)&&masterMatch(t)}).sort((a,b)=>{const pri=x=>x.priority==='高'?0:x.priority==='中'?1:2;const p=pri(a)-pri(b);if(p)return p;const da=a.dueDate||'9999-12-31',db=b.dueDate||'9999-12-31';return da.localeCompare(db)});
+ const getTodoGenre=t=>['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況';
  const open=all.filter(t=>t.status!=='完了');
- const high=open.filter(t=>t.priority==='高').length;
- const waiting=all.filter(t=>t.status==='確認待ち').length;
+ const distributionCount=all.filter(t=>getTodoGenre(t)==='流通状況').length;
+ const diCount=all.filter(t=>getTodoGenre(t)==='DI情報').length;
  const masterPending=all.filter(isAlternativeMasterPending).length;
- $('#supplyTodoSummary').innerHTML=`<button type="button" class="todo-summary-item todo-summary-link" data-todo-action="open" aria-label="未完了To Doの一覧を表示"><div class="k">未完了 To Do</div><div class="v">${open.length}</div><div class="muted text-sm">完了以外を表示 →</div></button><button type="button" class="todo-summary-item todo-summary-link" data-todo-action="high" aria-label="優先度が高いTo Doを表示"><div class="k">優先度：高</div><div class="v" style="color:var(--red)">${high}</div><div class="muted text-sm">未完了の高優先度 →</div></button><button type="button" class="todo-summary-item todo-summary-link" data-todo-action="waiting" aria-label="確認待ちのTo Doを表示"><div class="k">確認待ち</div><div class="v">${waiting}</div><div class="muted text-sm">確認待ちのみ表示 →</div></button><button type="button" class="todo-summary-item todo-summary-link" data-todo-action="master-pending" aria-label="代替薬マスターが必要で未作成のTo Doを表示"><div class="k">代替薬マスター未作成</div><div class="v" style="color:var(--red)">${masterPending}</div><div class="muted text-sm">必要かつ未作成・作成中 →</div></button>`;
+ $('#supplyTodoSummary').innerHTML=`<button type="button" class="todo-summary-item todo-summary-link" data-todo-action="open" aria-label="未完了To Doの一覧を表示"><div class="k">未完了 To Do</div><div class="v">${open.length}</div><div class="muted text-sm">完了以外を表示 →</div></button><button type="button" class="todo-summary-item todo-summary-link" data-todo-action="distribution" aria-label="流通状況の情報を表示"><div class="k">流通状況</div><div class="v">${distributionCount}</div><div class="muted text-sm">流通状況の情報を表示 →</div></button><button type="button" class="todo-summary-item todo-summary-link" data-todo-action="di" aria-label="DI情報を表示"><div class="k">DI情報</div><div class="v">${diCount}</div><div class="muted text-sm">DI情報を表示 →</div></button><button type="button" class="todo-summary-item todo-summary-link" data-todo-action="master-pending" aria-label="代替薬マスターが必要で未作成のTo Doを表示"><div class="k">代替薬マスター未作成</div><div class="v" style="color:var(--red)">${masterPending}</div><div class="muted text-sm">必要かつ未作成・作成中 →</div></button>`;
  const cards=list.map(t=>{
   const period=(t.annualPeriodFrom||t.annualPeriodTo)?`${fmtDate(t.annualPeriodFrom)} ～ ${fmtDate(t.annualPeriodTo)}`:'集計期間未入力';
   const rx=String(t.annualPrescriptionCount??'').trim()!==''?`${Number(t.annualPrescriptionCount).toLocaleString('ja-JP')} 件`:'未集計';
@@ -870,7 +871,7 @@ $('#supplyTodoGenreFilter').addEventListener('change',renderSupplyTodos);
 $('#supplyTodoStatusFilter').addEventListener('change',renderSupplyTodos);
 $('#supplyTodoPriorityFilter').addEventListener('change',renderSupplyTodos);
 $('#supplyTodoMasterFilter').addEventListener('change',renderSupplyTodos);
-$('#supplyTodoSummary').addEventListener('click',e=>{const b=e.target.closest('[data-todo-action]');if(!b)return;$('#supplyTodoSearch').value='';$('#supplyTodoGenreFilter').value='';$('#supplyTodoStatusFilter').value='';$('#supplyTodoPriorityFilter').value='';$('#supplyTodoMasterFilter').value='';switch(b.dataset.todoAction){case 'open':$('#supplyTodoStatusFilter').value='__open__';break;case 'high':$('#supplyTodoStatusFilter').value='__open__';$('#supplyTodoPriorityFilter').value='高';break;case 'waiting':$('#supplyTodoStatusFilter').value='確認待ち';break;case 'master-pending':$('#supplyTodoMasterFilter').value='__required_not_created__';break;}renderSupplyTodos();$('#supplyTodoList').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});});
+$('#supplyTodoSummary').addEventListener('click',e=>{const b=e.target.closest('[data-todo-action]');if(!b)return;$('#supplyTodoSearch').value='';$('#supplyTodoGenreFilter').value='';$('#supplyTodoStatusFilter').value='';$('#supplyTodoPriorityFilter').value='';$('#supplyTodoMasterFilter').value='';switch(b.dataset.todoAction){case 'open':$('#supplyTodoStatusFilter').value='__open__';break;case 'distribution':$('#supplyTodoGenreFilter').value='流通状況';break;case 'di':$('#supplyTodoGenreFilter').value='DI情報';break;case 'master-pending':$('#supplyTodoMasterFilter').value='__required_not_created__';break;}renderSupplyTodos();$('#supplyTodoList').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});});
 $('#exportSupplyTodos').addEventListener('click',()=>{
  const keys=[['ID','id'],['情報ジャンル','infoGenre'],['医薬品名','drugName'],['成分名','ingredient'],['製造販売会社','company'],['YJコード','yjCode'],['採用区分','targetScope'],['流通状況','supplyIssueType'],['流通状況発生日','supplyIssueStartDate'],['問題を把握した日','issueDetectedDate'],['最新情報確認日','lastConfirmedDate'],['流通状況・理由','supplyDetails'],['供給見通し','supplyOutlook'],['情報源URL','sourceUrl'],['集計期間開始日','annualPeriodFrom'],['集計期間終了日','annualPeriodTo'],['年間処方件数','annualPrescriptionCount'],['年間処方数量','annualPrescriptionQuantity'],['数量単位','annualQuantityUnit'],['代替薬のマスター作成の必要性','masterNeedStatus'],['代替薬のマスター作成状況','masterProgress'],['対応状況','status'],['優先度','priority'],['対応期限','dueDate'],['担当者・担当部署','assignedTo'],['代替薬候補・対応案','alternativePlan'],['次に行うこと','nextAction'],['関連対応案件ID','relatedCaseId'],['備考','notes'],['作成日時','createdAt'],['更新日時','updatedAt']];
  exportCsv(keys,(state.supplyTodos||[]).map(t=>({...t,infoGenre:['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況'})),'院外採用薬_ToDo_'+today()+'.csv');
