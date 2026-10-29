@@ -455,7 +455,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.15</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.16</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="supplyTodos">☑　To Doリストまたは情報共有</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
@@ -476,7 +476,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 <div class="table-wrap"><table class="data-table"><thead><tr><th>購入日・医薬品</th><th>購入理由</th><th>購入数・費用</th><th>使用実績</th><th>残数</th><th>最終評価</th><th>操作</th></tr></thead><tbody id="purchasesTable"></tbody></table></div><div id="purchaseCount" class="text-sm muted" style="margin-top:9px"></div>
 </section>
 <section id="tab-supplyTodos" hidden>
-<div class="section-head"><div><h2>To Doリストまたは情報共有</h2><p>流通上の問題が発生する期間、当院の年間処方実績、代替薬マスターの作成必要性、次に行う対応を一元管理します。</p></div><div class="actions"><button class="btn" id="exportSupplyTodos">To Do一覧CSV</button><button class="btn primary" id="addSupplyTodo">＋ To Doを追加</button></div></div>
+<div class="section-head"><div><h2>To Doリストまたは情報共有</h2><p>流通上の問題が発生する期間、当院の年間処方実績、代替薬マスターの作成必要性、次に行う対応を一元管理します。一覧は「最新の情報確認日」が新しい順に表示します。</p></div><div class="actions"><button class="btn" id="exportSupplyTodos">To Do一覧CSV</button><button class="btn primary" id="addSupplyTodo">＋ To Doを追加</button></div></div>
 <div class="todo-summary" id="supplyTodoSummary"></div>
 <div class="toolbar"><div class="field search"><label for="supplyTodoSearch">キーワード検索</label><input id="supplyTodoSearch" placeholder="医薬品名、メーカー、流通状況、対応内容など"></div><div class="field filter"><label for="supplyTodoGenreFilter">情報ジャンル</label><select id="supplyTodoGenreFilter"><option value="">すべて</option><option value="流通状況">流通状況</option><option value="DI情報">DI情報</option></select></div><div class="field filter"><label for="supplyTodoStatusFilter">対応状況</label><select id="supplyTodoStatusFilter"><option value="">すべて</option><option value="__open__">未完了（完了以外）</option><option>未着手</option><option>対応中</option><option>確認待ち</option><option>完了</option></select></div><div class="field filter"><label for="supplyTodoPriorityFilter">優先度</label><select id="supplyTodoPriorityFilter"><option value="">すべて</option><option>高</option><option>中</option><option>低</option></select></div><div class="field filter"><label for="supplyTodoMasterFilter">代替薬のマスター作成の必要性</label><select id="supplyTodoMasterFilter"><option value="">すべて</option><option value="__required_not_created__">必要・未作成</option><option>未確認</option><option>必要</option><option>不要</option></select></div></div>
 <div id="supplyTodoList" class="todo-list"></div><div id="supplyTodoCount" class="text-sm muted" style="margin-top:10px"></div>
@@ -522,7 +522,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v1.0.15｜運用版・スマホ／PC対応</div>
+<div class="footer">薬剤部ナレッジ管理 v1.0.16｜運用版・スマホ／PC対応</div>
 </main>
 </div>
 
@@ -690,7 +690,7 @@ function renderSupplyTodos(){
  const all=state.supplyTodos||[];
  const statusMatch=t=>!status||(status==='__open__'?t.status!=='完了':t.status===status);
  const masterMatch=t=>!master||(master==='__required_not_created__'?isAlternativeMasterPending(t):t.masterNeedStatus===master);
- const list=all.filter(t=>{const text=[t.infoGenre||'流通状況',t.drugName,t.ingredient,t.company,t.yjCode,t.supplyIssueType,t.supplyIssueStartDate,t.supplyIssueEndDate,t.supplyDetails,t.supplyOutlook,t.alternativePlan,t.nextAction,t.assignedTo,t.notes,t.sourceUrl].join(' ').toLowerCase();const itemGenre=['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況';return (!q||text.includes(q))&&(!genre||itemGenre===genre)&&statusMatch(t)&&(!priority||t.priority===priority)&&masterMatch(t)}).sort((a,b)=>{const pri=x=>x.priority==='高'?0:x.priority==='中'?1:2;const p=pri(a)-pri(b);if(p)return p;const da=a.dueDate||'9999-12-31',db=b.dueDate||'9999-12-31';return da.localeCompare(db)});
+ const list=all.filter(t=>{const text=[t.infoGenre||'流通状況',t.drugName,t.ingredient,t.company,t.yjCode,t.supplyIssueType,t.supplyIssueStartDate,t.supplyIssueEndDate,t.supplyDetails,t.supplyOutlook,t.alternativePlan,t.nextAction,t.assignedTo,t.notes,t.sourceUrl].join(' ').toLowerCase();const itemGenre=['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況';return (!q||text.includes(q))&&(!genre||itemGenre===genre)&&statusMatch(t)&&(!priority||t.priority===priority)&&masterMatch(t)}).sort((a,b)=>{const ca=String(a.lastConfirmedDate||'').trim(),cb=String(b.lastConfirmedDate||'').trim();if(ca!==cb){if(!ca)return 1;if(!cb)return -1;const byConfirm=cb.localeCompare(ca);if(byConfirm)return byConfirm;}const ua=String(a.updatedAt||a.createdAt||''),ub=String(b.updatedAt||b.createdAt||'');const byUpdate=ub.localeCompare(ua);if(byUpdate)return byUpdate;return String(a.drugName||'').localeCompare(String(b.drugName||''),'ja')});
  const getTodoGenre=t=>['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況';
  const open=all.filter(t=>t.status!=='完了');
  const distributionCount=all.filter(t=>getTodoGenre(t)==='流通状況').length;
