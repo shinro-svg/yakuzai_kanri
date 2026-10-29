@@ -288,14 +288,15 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 
 /* v1.0.7: Show case summary in the first row and the complete notes in a full-width second row. */
 #tab-cases .table-wrap{width:100%;overflow-x:auto;}
-#tab-cases #casesTable{table-layout:fixed;min-width:1260px;}
+#tab-cases #casesTable{table-layout:fixed;min-width:1355px;}
 #tab-cases #casesTable th:nth-child(1),#tab-cases #casesTable td:nth-child(1){width:185px;}
 #tab-cases #casesTable th:nth-child(2),#tab-cases #casesTable td:nth-child(2){width:225px;}
 #tab-cases #casesTable th:nth-child(3),#tab-cases #casesTable td:nth-child(3){width:355px;}
-#tab-cases #casesTable th:nth-child(4),#tab-cases #casesTable td:nth-child(4){width:105px;}
-#tab-cases #casesTable th:nth-child(5),#tab-cases #casesTable td:nth-child(5){width:135px;}
-#tab-cases #casesTable th:nth-child(6),#tab-cases #casesTable td:nth-child(6){width:95px;min-width:0;}
-#tab-cases #casesTable th:nth-child(7),#tab-cases #casesTable td:nth-child(7){width:160px;}
+#tab-cases #casesTable th:nth-child(4),#tab-cases #casesTable td:nth-child(4){width:95px;}
+#tab-cases #casesTable th:nth-child(5),#tab-cases #casesTable td:nth-child(5){width:105px;}
+#tab-cases #casesTable th:nth-child(6),#tab-cases #casesTable td:nth-child(6){width:135px;min-width:0;}
+#tab-cases #casesTable th:nth-child(7),#tab-cases #casesTable td:nth-child(7){width:95px;}
+#tab-cases #casesTable th:nth-child(8),#tab-cases #casesTable td:nth-child(8){width:160px;}
 #tab-cases #casesTable tr.case-main-row td{vertical-align:top;border-bottom:0;padding-top:13px;padding-bottom:13px;}
 #tab-cases #casesTable tr.case-notes-row td.case-notes-full{width:100%;min-width:0;padding:11px 16px 15px;background:#f7fafc;border-top:1px solid #e3ebf0;border-bottom:2px solid #d9e2e8;text-align:left;vertical-align:top;white-space:normal;}
 .case-notes-label{font-size:12px;font-weight:800;color:var(--muted);margin-bottom:5px;}
@@ -331,13 +332,15 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
   #tab-cases #casesTable th:nth-child(3),
   #tab-cases #casesTable td:nth-child(3) { width: 315px; }
   #tab-cases #casesTable th:nth-child(4),
-  #tab-cases #casesTable td:nth-child(4) { width: 105px; }
+  #tab-cases #casesTable td:nth-child(4) { width: 95px; }
   #tab-cases #casesTable th:nth-child(5),
-  #tab-cases #casesTable td:nth-child(5) { width: 135px; }
+  #tab-cases #casesTable td:nth-child(5) { width: 105px; }
   #tab-cases #casesTable th:nth-child(6),
-  #tab-cases #casesTable td:nth-child(6) { width: 95px; }
+  #tab-cases #casesTable td:nth-child(6) { width: 135px; }
   #tab-cases #casesTable th:nth-child(7),
-  #tab-cases #casesTable td:nth-child(7) { width: 160px; }
+  #tab-cases #casesTable td:nth-child(7) { width: 95px; }
+  #tab-cases #casesTable th:nth-child(8),
+  #tab-cases #casesTable td:nth-child(8) { width: 160px; }
 }
 
 @media (max-width: 640px) {
@@ -369,13 +372,14 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
   #tab-cases #casesTable tr.case-main-row td:nth-child(2),
   #tab-cases #casesTable tr.case-main-row td:nth-child(3),
   #tab-cases #casesTable tr.case-main-row td:nth-child(6),
-  #tab-cases #casesTable tr.case-main-row td:nth-child(7) { grid-column: 1 / -1; }
+  #tab-cases #casesTable tr.case-main-row td:nth-child(7),
+  #tab-cases #casesTable tr.case-main-row td:nth-child(8) { grid-column: 1 / -1; }
   #tab-cases #casesTable tr.case-main-row td:nth-child(1) { padding-top: 8px !important; }
   #tab-cases #casesTable tr.case-main-row td:nth-child(3) { padding-bottom: 12px !important; }
   #tab-cases #casesTable tr.case-main-row td:nth-child(4),
   #tab-cases #casesTable tr.case-main-row td:nth-child(5) { align-self: start; }
   #tab-cases #casesTable tr.case-main-row td:nth-child(6) { padding-top: 9px !important; }
-  #tab-cases #casesTable tr.case-main-row td:nth-child(7) { border-bottom: 0; padding-top: 8px !important; padding-bottom: 12px !important; }
+  #tab-cases #casesTable tr.case-main-row td:nth-child(8) { border-bottom: 0; padding-top: 8px !important; padding-bottom: 12px !important; }
   #tab-cases #casesTable .main-name { min-width: 0; font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
   #tab-cases #casesTable .subline { font-size: 12px; line-height: 1.5; }
   #tab-cases #casesTable .alternative-candidates { display: block; width: 100%; min-width: 0; margin: 4px 0 0; }
@@ -385,6 +389,8 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
   #tab-cases #casesTable .alternative-candidate-number { display: block; width: auto; font-size: 13px; line-height: 1.55; }
   #tab-cases #casesTable .alternative-candidate-name { display: block !important; flex: initial; width: 100%; min-width: 0; font-size: 14px; line-height: 1.55; white-space: normal !important; overflow: visible !important; overflow-wrap: anywhere !important; word-break: normal !important; }
   #tab-cases #casesTable .quote-summary { font-size: 12px; margin-top: 6px; }
+#tab-cases #casesTable .quote-status-cell .pill { font-size: 12px; padding: 6px 9px; }
+#tab-cases #casesTable .quote-status-cell .subline { margin-top: 7px; line-height: 1.45; }
   #tab-cases #casesTable .actions { display: flex; flex-wrap: wrap; gap: 7px; width: 100%; }
   #tab-cases #casesTable .actions .btn { flex: 1 1 calc(33.333% - 7px); min-width: 78px; }
   #tab-cases #casesTable tr.case-notes-row { display: block !important; width: 100%; margin: 0 0 12px !important; padding: 0 14px 0 !important; background: #f7fafc; border: 1px solid var(--line); border-top: 1px solid #e3ebf0; border-radius: 0 0 14px 14px; box-shadow: 0 3px 12px rgba(22,52,75,.05); overflow: hidden; }
@@ -455,7 +461,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.17</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.18</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="supplyTodos">☑　情報共有</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
@@ -468,7 +474,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 <section id="tab-cases" hidden>
 <div class="section-head"><div><h2>医薬品の対応案件</h2><p>経過措置・販売中止・供給問題などの対応状況と代替薬の判断を管理します。</p></div><div class="actions"><button class="btn" id="exportCases">CSV出力</button><button class="btn primary" id="addCase">＋ 対応案件を登録</button></div></div>
 <div class="toolbar"><div class="field search"><label for="caseSearch">キーワード検索</label><input id="caseSearch" placeholder="薬剤名、成分名、代替薬、担当者、理由など"></div><div class="field filter"><label for="caseStatusFilter">対応状況</label><select id="caseStatusFilter"><option value="">すべての状況</option><option value="__active__">対応中（完了以外）</option><option value="__quoted__">見積済み（未完了案件）</option><option value="__unquoted__">見積未（未完了案件）</option><option value="__undecided__">代替薬未決定</option><option value="__decided__">代替薬決定済み</option><option>未着手</option><option>検討中</option><option>見積済み</option><option>仮決定</option><option>決定済み</option><option>切替中</option><option>完了</option></select></div><div class="field filter"><label for="caseStockoutFilter">在庫消尽見込</label><select id="caseStockoutFilter"><option value="">すべて</option><option value="__near__">30日以内・超過</option><option value="__any__">日付登録済み</option></select></div><div class="field filter"><label for="caseTypeFilter">事象の種類</label><select id="caseTypeFilter"><option value="">すべての種類</option><option>経過措置</option><option>販売中止</option><option>限定出荷</option><option>供給停止・欠品</option><option>院内採用中止</option><option>その他</option></select></div></div>
-<div class="table-wrap"><table class="data-table cases-table"><thead><tr><th>医薬品</th><th>期限・切替日</th><th>代替薬</th><th>対応状況</th><th>薬事委員会決定</th><th>更新日</th><th>操作</th></tr></thead><tbody id="casesTable"></tbody></table></div><div id="caseCount" class="text-sm muted" style="margin-top:9px"></div>
+<div class="table-wrap"><table class="data-table cases-table"><thead><tr><th>医薬品</th><th>期限・切替日</th><th>代替薬</th><th>見積状況</th><th>対応状況</th><th>薬事委員会決定</th><th>更新日</th><th>操作</th></tr></thead><tbody id="casesTable"></tbody></table></div><div id="caseCount" class="text-sm muted" style="margin-top:9px"></div>
 </section>
 <section id="tab-purchases" hidden>
 <div class="section-head"><div><h2>臨時購入管理</h2><p>購入理由・費用・患者数・使用回数・残数を記録し、臨時購入の妥当性を振り返ります。</p></div><div class="actions"><button class="btn" id="exportPurchases">購入一覧CSV</button><button class="btn" id="exportUsageLogs">使用実績CSV</button><button class="btn primary" id="addPurchase">＋ 臨時購入を記録</button></div></div>
@@ -635,7 +641,7 @@ function renderAlternativeCandidates(c){
  return `<div class="alternative-candidates"><div class="alternative-candidates-label">代替薬候補（${names.length}剤）</div><div class="alternative-candidate-list">${names.map((name,index)=>`<div class="alternative-candidate-item"><span class="alternative-candidate-number">${index+1}.</span><span class="alternative-candidate-name">${esc(name)}</span></div>`).join('')}</div></div>`;
 }
 function renderCases(){const q=$('#caseSearch').value.toLowerCase().trim(),status=$('#caseStatusFilter').value,type=$('#caseTypeFilter').value,stockoutFilter=$('#caseStockoutFilter').value;let list=state.cases.filter(c=>{const hay=[c.drugName,c.ingredient,c.strength,c.type,c.alternatives,c.selectedAlternative,c.prescriptionMasterStatus,c.ptCommitteeDecision?'薬事委員会決定事項あり':'薬事委員会決定事項なし',c.owner,c.decisionMaker,c.decisionReason,c.notes,...(c.alternativeQuotes||[]).map(q=>q.name)].join(' ').toLowerCase();const statusMatch=!status||(status==='__active__'&&c.status!=='完了')||(status==='__quoted__'&&c.status!=='完了'&&c.status==='見積済み')||(status==='__unquoted__'&&c.status!=='完了'&&c.status!=='見積済み')||c.status===status;const stockoutDays=daysUntilDate(c.stockoutDate);const stockoutMatch=!stockoutFilter||(stockoutFilter==='__near__'&&c.status!=='完了'&&stockoutDays!==null&&stockoutDays<=30)||(stockoutFilter==='__any__'&&stockoutDays!==null);return (!q||hay.includes(q))&&statusMatch&&(!type||c.type===type)&&stockoutMatch}).sort(caseSortPriority);
- $('#casesTable').innerHTML=list.length?list.map(c=>`<tr class="case-main-row"><td><div class="main-name">${esc(c.drugName)} ${c.sample?'<span class="pill gray">サンプル</span>':''}</div><div class="subline">${esc(c.ingredient||'成分未入力')} ・ ${esc(c.company||'会社名未入力')}</div><div class="subline">YJコード：${esc(c.code||'未入力')}</div></td><td>${pillType(c.type)}<div class="subline">${c.deadline?`経過措置期限：${fmtDate(c.deadline)}<div>${dateLevel(c)}</div>`:'経過措置期限：—'}</div>${c.stockCheckDate?`<div class="subline"><strong>院内在庫確認日：</strong>${esc(fmtDate(c.stockCheckDate))}</div>`:''}${c.stockoutDate?`<div class="subline stockout-date-line"><strong>在庫消尽見込：</strong>${fmtDate(c.stockoutDate)}</div><div class="stockout-countdown">${stockoutDateLevel(c)}</div>`:`<div class="subline stockout-date-line"><strong>在庫消尽見込：</strong>未登録</div>`}${c.switchDate?`<div class="subline"><strong>切替日：</strong>${esc(fmtDate(c.switchDate))}</div>`:''}</td><td>${c.selectedAlternative?`<strong>${esc(c.selectedAlternative)}</strong>`:'<span class="muted">未決定</span>'}${renderAlternativeCandidates(c)}<div class="subline">処方マスター：<span class="pill ${c.prescriptionMasterStatus==='作成済み'?'green':c.prescriptionMasterStatus==='未作成'?'amber':'gray'}">${esc(c.prescriptionMasterStatus||'未確認')}</span></div><div class="quote-summary">見積入力：${getQuoteCount(c)}/24件</div></td><td>${pillStatus(c.status)}</td><td><span class="pill ${c.ptCommitteeDecision===true?'green':'gray'}">${c.ptCommitteeDecision===true?'決定事項あり':'決定事項なし'}</span></td><td>${fmtDate((c.updatedAt||'').slice(0,10))}</td><td><div class="actions"><button class="btn small" data-edit-case="${esc(c.id)}">編集</button><button class="btn small" data-log-case="${esc(c.id)}">メモ</button><button class="btn small danger" data-del-case="${esc(c.id)}">削除</button></div></td></tr><tr class="case-notes-row"><td colspan="7" class="case-notes-full"><div class="case-notes-label">備考</div><div class="notes-list-content">${esc(String(c.notes||'').trim()||'—')}</div></td></tr>`).join(''):'<tr><td colspan="7"><div class="empty">該当する案件はありません。</div></td></tr>';
+ $('#casesTable').innerHTML=list.length?list.map(c=>`<tr class="case-main-row"><td><div class="main-name">${esc(c.drugName)} ${c.sample?'<span class="pill gray">サンプル</span>':''}</div><div class="subline">${esc(c.ingredient||'成分未入力')} ・ ${esc(c.company||'会社名未入力')}</div><div class="subline">YJコード：${esc(c.code||'未入力')}</div></td><td>${pillType(c.type)}<div class="subline">${c.deadline?`経過措置期限：${fmtDate(c.deadline)}<div>${dateLevel(c)}</div>`:'経過措置期限：—'}</div>${c.stockCheckDate?`<div class="subline"><strong>院内在庫確認日：</strong>${esc(fmtDate(c.stockCheckDate))}</div>`:''}${c.stockoutDate?`<div class="subline stockout-date-line"><strong>在庫消尽見込：</strong>${fmtDate(c.stockoutDate)}</div><div class="stockout-countdown">${stockoutDateLevel(c)}</div>`:`<div class="subline stockout-date-line"><strong>在庫消尽見込：</strong>未登録</div>`}${c.switchDate?`<div class="subline"><strong>切替日：</strong>${esc(fmtDate(c.switchDate))}</div>`:''}</td><td>${c.selectedAlternative?`<strong>${esc(c.selectedAlternative)}</strong>`:'<span class="muted">未決定</span>'}${renderAlternativeCandidates(c)}<div class="subline">処方マスター：<span class="pill ${c.prescriptionMasterStatus==='作成済み'?'green':c.prescriptionMasterStatus==='未作成'?'amber':'gray'}">${esc(c.prescriptionMasterStatus||'未確認')}</span></div></td><td class="quote-status-cell">${renderQuoteStatus(c)}</td><td>${pillStatus(c.status)}</td><td><span class="pill ${c.ptCommitteeDecision===true?'green':'gray'}">${c.ptCommitteeDecision===true?'決定事項あり':'決定事項なし'}</span></td><td>${fmtDate((c.updatedAt||'').slice(0,10))}</td><td><div class="actions"><button class="btn small" data-edit-case="${esc(c.id)}">編集</button><button class="btn small" data-log-case="${esc(c.id)}">メモ</button><button class="btn small danger" data-del-case="${esc(c.id)}">削除</button></div></td></tr><tr class="case-notes-row"><td colspan="8" class="case-notes-full"><div class="case-notes-label">備考</div><div class="notes-list-content">${esc(String(c.notes||'').trim()||'—')}</div></td></tr>`).join(''):'<tr><td colspan="8"><div class="empty">該当する案件はありません。</div></td></tr>';
  $('#caseCount').textContent=`${list.length}件表示／全${state.cases.length}件`;
  $$('[data-edit-case]').forEach(b=>b.addEventListener('click',()=>openCaseModal(b.dataset.editCase)));$$('[data-log-case]').forEach(b=>b.addEventListener('click',()=>openHistoryModal({relatedId:b.dataset.logCase})));$$('[data-del-case]').forEach(b=>b.addEventListener('click',()=>deleteCase(b.dataset.delCase)));
  applyResponsiveTableLabels();
@@ -812,6 +818,8 @@ function getQuoteCount(c){
  for(let i=1;i<=4;i++) for(const supplier of quoteSuppliers){if(String(quoteValue(c,i,supplier.key)??'').trim()!=='' || (supplier.key==='Other'&&String(quoteMetaValue(c,i,supplier.key,'otherSupplierName')??'').trim()!=='')) count++;}
  return count;
 }
+function getPricedQuoteCount(c){let count=0;for(let i=1;i<=4;i++)for(const supplier of quoteSuppliers){if(String(quoteValue(c,i,supplier.key)??'').trim()!=='')count++;}return count;}
+function renderQuoteStatus(c){const count=getPricedQuoteCount(c);return count?`<span class="pill green">見積あり</span><div class="subline">価格入力：${count}/24件</div>`:'<span class="pill red">見積未</span><div class="subline">見積価格は未入力</div>'; }
 function openCaseModal(id=null){
  const c=state.cases.find(x=>x.id===id)||{};const isEdit=!!id;const legacyNames=legacyAlternativeNames(c);
  const quoteInputs=[1,2,3,4].map(i=>quoteCandidateMarkup(c,i,legacyNames)).join('');
