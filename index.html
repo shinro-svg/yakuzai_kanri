@@ -105,6 +105,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
   .field input,.field select,.field textarea{font-size:16px;min-height:46px;padding:11px 12px;border-radius:10px}
   .field textarea{min-height:95px}
   .form-grid,.settings-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+ .supply-period-inputs{grid-template-columns:minmax(0,1fr);gap:9px}.supply-period-separator{display:none}.supply-period-inputs .field input[type="date"]{width:100%;max-width:100%;min-width:0}
   .form-grid .full{grid-column:auto}
   .setting-card{padding:14px}
   .setting-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
@@ -432,6 +433,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 .genre-select-field{border:1px solid #c7dced;background:#f5faff;border-radius:10px;padding:12px}
 .genre-select-field label{font-weight:800}
 .field-help{display:block;margin-top:6px;color:var(--muted);font-size:12px;line-height:1.5}
+.supply-period-field{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fbfdff}.supply-period-title{font-size:12px;font-weight:800;color:#405b6d;margin-bottom:8px}.supply-period-inputs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:end;gap:10px}.supply-period-inputs .field{min-width:0}.supply-period-separator{padding:0 2px 12px;color:var(--muted);font-weight:800}.supply-period-field>small{display:block;margin-top:8px;color:var(--muted);font-size:11px;line-height:1.5}
 @media(max-width:640px){
  .todo-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
  .todo-summary-item{padding:10px 8px}
@@ -453,7 +455,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.14</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.15</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="supplyTodos">☑　To Doリストまたは情報共有</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
@@ -474,7 +476,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 <div class="table-wrap"><table class="data-table"><thead><tr><th>購入日・医薬品</th><th>購入理由</th><th>購入数・費用</th><th>使用実績</th><th>残数</th><th>最終評価</th><th>操作</th></tr></thead><tbody id="purchasesTable"></tbody></table></div><div id="purchaseCount" class="text-sm muted" style="margin-top:9px"></div>
 </section>
 <section id="tab-supplyTodos" hidden>
-<div class="section-head"><div><h2>To Doリストまたは情報共有</h2><p>流通状況の発生日、当院の年間処方実績、代替薬マスターの作成必要性、次に行う対応を一元管理します。</p></div><div class="actions"><button class="btn" id="exportSupplyTodos">To Do一覧CSV</button><button class="btn primary" id="addSupplyTodo">＋ To Doを追加</button></div></div>
+<div class="section-head"><div><h2>To Doリストまたは情報共有</h2><p>流通上の問題が発生する期間、当院の年間処方実績、代替薬マスターの作成必要性、次に行う対応を一元管理します。</p></div><div class="actions"><button class="btn" id="exportSupplyTodos">To Do一覧CSV</button><button class="btn primary" id="addSupplyTodo">＋ To Doを追加</button></div></div>
 <div class="todo-summary" id="supplyTodoSummary"></div>
 <div class="toolbar"><div class="field search"><label for="supplyTodoSearch">キーワード検索</label><input id="supplyTodoSearch" placeholder="医薬品名、メーカー、流通状況、対応内容など"></div><div class="field filter"><label for="supplyTodoGenreFilter">情報ジャンル</label><select id="supplyTodoGenreFilter"><option value="">すべて</option><option value="流通状況">流通状況</option><option value="DI情報">DI情報</option></select></div><div class="field filter"><label for="supplyTodoStatusFilter">対応状況</label><select id="supplyTodoStatusFilter"><option value="">すべて</option><option value="__open__">未完了（完了以外）</option><option>未着手</option><option>対応中</option><option>確認待ち</option><option>完了</option></select></div><div class="field filter"><label for="supplyTodoPriorityFilter">優先度</label><select id="supplyTodoPriorityFilter"><option value="">すべて</option><option>高</option><option>中</option><option>低</option></select></div><div class="field filter"><label for="supplyTodoMasterFilter">代替薬のマスター作成の必要性</label><select id="supplyTodoMasterFilter"><option value="">すべて</option><option value="__required_not_created__">必要・未作成</option><option>未確認</option><option>必要</option><option>不要</option></select></div></div>
 <div id="supplyTodoList" class="todo-list"></div><div id="supplyTodoCount" class="text-sm muted" style="margin-top:10px"></div>
@@ -520,7 +522,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v1.0.14｜運用版・スマホ／PC対応</div>
+<div class="footer">薬剤部ナレッジ管理 v1.0.15｜運用版・スマホ／PC対応</div>
 </main>
 </div>
 
@@ -659,7 +661,7 @@ function openSupplyTodoModal(id=null){
  ${inputField('<span class="required">*</span> 医薬品名','drugName',t.drugName||'','text','required')}${inputField('成分名','ingredient',t.ingredient||'')}${inputField('製造販売会社','company',t.company||'')}${inputField('YJコード','yjCode',t.yjCode||'')}${selectField('採用区分','targetScope',['院外処方採用薬','院外・院内共通','確認中'],t.targetScope||'院外処方採用薬')}
  </div>
  <div class="form-section">流通状況・根拠情報</div><div class="form-grid">
- ${selectField('流通上の状況','supplyIssueType',supplyIssueTypes,t.supplyIssueType||'限定出荷')}${inputField('流通上の状況が発生する日','supplyIssueStartDate',t.supplyIssueStartDate||'','date')}${inputField('問題を把握した日','issueDetectedDate',t.issueDetectedDate||today(),'date')}${inputField('最新の情報確認日','lastConfirmedDate',t.lastConfirmedDate||today(),'date')}${inputField('情報源URL','sourceUrl',t.sourceUrl||'','url')}
+ ${selectField('流通上の状況','supplyIssueType',supplyIssueTypes,t.supplyIssueType||'限定出荷')}<div class="field full supply-period-field"><div class="supply-period-title">流通上の問題が発生する期間</div><div class="supply-period-inputs"><div class="field"><label for="f_supplyIssueStartDate">開始日</label><input id="f_supplyIssueStartDate" name="supplyIssueStartDate" type="date" value="${val({v:t.supplyIssueStartDate||''},'v')}"></div><span class="supply-period-separator" aria-hidden="true">～</span><div class="field"><label for="f_supplyIssueEndDate">終了日</label><input id="f_supplyIssueEndDate" name="supplyIssueEndDate" type="date" value="${val({v:t.supplyIssueEndDate||''},'v')}"></div></div><small>開始日・終了日を入力してください。継続中、または終了日が未定の場合は終了日を空欄にします。</small></div>${inputField('問題を把握した日','issueDetectedDate',t.issueDetectedDate||today(),'date')}${inputField('最新の情報確認日','lastConfirmedDate',t.lastConfirmedDate||today(),'date')}${inputField('情報源URL','sourceUrl',t.sourceUrl||'','url')}
  ${textareaField('具体的な流通状況・理由','supplyDetails',t.supplyDetails||'','full')}${textareaField('メーカー・卸からの案内、供給見通し','supplyOutlook',t.supplyOutlook||'','full')}
  </div>
  <div class="form-section">当院の年間処方実績</div><div class="form-grid">
@@ -673,6 +675,7 @@ function openSupplyTodoModal(id=null){
 }
 function saveSupplyTodo(f){
  if(!String(f.drugName||'').trim()){toast('医薬品名を入力してください');$('#f_drugName').focus();return}
+ if(f.supplyIssueStartDate&&f.supplyIssueEndDate&&f.supplyIssueEndDate<f.supplyIssueStartDate){toast('流通上の問題が発生する期間の終了日は、開始日以降の日付にしてください');$('#f_supplyIssueEndDate').focus();return}
  const old=state.supplyTodos.find(x=>x.id===editingId);
  const item={...old,...f,id:editingId||uid(),drugName:String(f.drugName||'').trim(),infoGenre:['流通状況','DI情報'].includes(String(f.infoGenre||''))?String(f.infoGenre):(old?.infoGenre||'流通状況'),updatedAt:now(),createdAt:old?.createdAt||now(),sample:false};
  item.annualPrescriptionCount=String(f.annualPrescriptionCount??'').trim();item.annualPrescriptionQuantity=String(f.annualPrescriptionQuantity??'').trim();
@@ -687,7 +690,7 @@ function renderSupplyTodos(){
  const all=state.supplyTodos||[];
  const statusMatch=t=>!status||(status==='__open__'?t.status!=='完了':t.status===status);
  const masterMatch=t=>!master||(master==='__required_not_created__'?isAlternativeMasterPending(t):t.masterNeedStatus===master);
- const list=all.filter(t=>{const text=[t.infoGenre||'流通状況',t.drugName,t.ingredient,t.company,t.yjCode,t.supplyIssueType,t.supplyDetails,t.supplyOutlook,t.alternativePlan,t.nextAction,t.assignedTo,t.notes,t.sourceUrl].join(' ').toLowerCase();const itemGenre=['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況';return (!q||text.includes(q))&&(!genre||itemGenre===genre)&&statusMatch(t)&&(!priority||t.priority===priority)&&masterMatch(t)}).sort((a,b)=>{const pri=x=>x.priority==='高'?0:x.priority==='中'?1:2;const p=pri(a)-pri(b);if(p)return p;const da=a.dueDate||'9999-12-31',db=b.dueDate||'9999-12-31';return da.localeCompare(db)});
+ const list=all.filter(t=>{const text=[t.infoGenre||'流通状況',t.drugName,t.ingredient,t.company,t.yjCode,t.supplyIssueType,t.supplyIssueStartDate,t.supplyIssueEndDate,t.supplyDetails,t.supplyOutlook,t.alternativePlan,t.nextAction,t.assignedTo,t.notes,t.sourceUrl].join(' ').toLowerCase();const itemGenre=['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況';return (!q||text.includes(q))&&(!genre||itemGenre===genre)&&statusMatch(t)&&(!priority||t.priority===priority)&&masterMatch(t)}).sort((a,b)=>{const pri=x=>x.priority==='高'?0:x.priority==='中'?1:2;const p=pri(a)-pri(b);if(p)return p;const da=a.dueDate||'9999-12-31',db=b.dueDate||'9999-12-31';return da.localeCompare(db)});
  const getTodoGenre=t=>['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況';
  const open=all.filter(t=>t.status!=='完了');
  const distributionCount=all.filter(t=>getTodoGenre(t)==='流通状況').length;
@@ -702,6 +705,7 @@ function renderSupplyTodos(){
   const source=String(t.sourceUrl||'').trim();const sourceHtml=/^https?:\/\//i.test(source)?`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">情報源を開く</a>`:(source?esc(source):'未登録');
   const related=state.cases.find(c=>c.id===t.relatedCaseId);const relatedHtml=related?`<button class="case-link" data-edit-case="${esc(related.id)}">${esc(related.drugName)}</button>`:'なし';
   const itemGenre=['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況';
+  const supplyIssuePeriod=(t.supplyIssueStartDate||t.supplyIssueEndDate)?`${t.supplyIssueStartDate?fmtDate(t.supplyIssueStartDate):'開始日未入力'} ～ ${t.supplyIssueEndDate?fmtDate(t.supplyIssueEndDate):'終了日未定'}`:'未入力';
   const genreClass=itemGenre==='DI情報'?' di':' distribution';
   return `<article class="card todo-card"><div class="todo-card-head"><div class="todo-card-title-wrap"><div class="todo-genre-row"><span class="todo-info-genre${genreClass}">${esc(itemGenre)}</span>${t.sample?'<span class="pill gray">サンプル</span>':''}</div><div class="todo-card-title">${esc(t.drugName)}</div><div class="todo-card-meta">${esc(t.ingredient||'成分未入力')} ・ ${esc(t.company||'会社未入力')} ・ YJコード：${esc(t.yjCode||'未入力')}</div></div><div class="todo-badges">${todoPriorityPill(t.priority)}${todoStatusPill(t.status)}</div></div><div class="todo-fields">
  <div class="todo-field full"><div class="k">採用区分</div><div class="v">${esc(t.targetScope||'未設定')}</div></div>
@@ -709,7 +713,7 @@ function renderSupplyTodos(){
  <div class="todo-field"><div class="k">当院の年間処方実績</div><div class="v">件数：${rx}<br>数量：${qty}<br><span class="muted">${esc(period)}</span></div></div>
  <div class="todo-field"><div class="k">代替薬のマスター作成</div><div class="v">作成必要性：<strong>${esc(t.masterNeedStatus||'未確認')}</strong><br>作成状況：${esc(t.masterProgress||'未着手')}</div></div>
  <div class="todo-field"><div class="k">期限・担当</div><div class="v">期限：${dueHtml}<br>担当：${esc(t.assignedTo||'未割当')}</div></div>
- <div class="todo-field"><div class="k">情報確認</div><div class="v">状況発生日：${fmtDate(t.supplyIssueStartDate)}<br>把握日：${fmtDate(t.issueDetectedDate)}<br>最新確認日：${fmtDate(t.lastConfirmedDate)}<br>${sourceHtml}</div></div>
+ <div class="todo-field"><div class="k">情報確認</div><div class="v">流通上の問題が発生する期間：${esc(supplyIssuePeriod)}<br>把握日：${fmtDate(t.issueDetectedDate)}<br>最新確認日：${fmtDate(t.lastConfirmedDate)}<br>${sourceHtml}</div></div>
  ${t.alternativePlan?`<div class="todo-field full"><div class="k">代替薬候補・対応案</div><div class="v">${esc(t.alternativePlan)}</div></div>`:''}
  ${t.nextAction?`<div class="todo-field full"><div class="k">次に行うこと</div><div class="v">${esc(t.nextAction)}</div></div>`:''}
  ${t.notes?`<div class="todo-field full"><div class="k">備考</div><div class="v">${esc(t.notes)}</div></div>`:''}
@@ -873,7 +877,7 @@ $('#supplyTodoPriorityFilter').addEventListener('change',renderSupplyTodos);
 $('#supplyTodoMasterFilter').addEventListener('change',renderSupplyTodos);
 $('#supplyTodoSummary').addEventListener('click',e=>{const b=e.target.closest('[data-todo-action]');if(!b)return;$('#supplyTodoSearch').value='';$('#supplyTodoGenreFilter').value='';$('#supplyTodoStatusFilter').value='';$('#supplyTodoPriorityFilter').value='';$('#supplyTodoMasterFilter').value='';switch(b.dataset.todoAction){case 'open':$('#supplyTodoStatusFilter').value='__open__';break;case 'distribution':$('#supplyTodoGenreFilter').value='流通状況';break;case 'di':$('#supplyTodoGenreFilter').value='DI情報';break;case 'master-pending':$('#supplyTodoMasterFilter').value='__required_not_created__';break;}renderSupplyTodos();$('#supplyTodoList').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});});
 $('#exportSupplyTodos').addEventListener('click',()=>{
- const keys=[['ID','id'],['情報ジャンル','infoGenre'],['医薬品名','drugName'],['成分名','ingredient'],['製造販売会社','company'],['YJコード','yjCode'],['採用区分','targetScope'],['流通状況','supplyIssueType'],['流通状況発生日','supplyIssueStartDate'],['問題を把握した日','issueDetectedDate'],['最新情報確認日','lastConfirmedDate'],['流通状況・理由','supplyDetails'],['供給見通し','supplyOutlook'],['情報源URL','sourceUrl'],['集計期間開始日','annualPeriodFrom'],['集計期間終了日','annualPeriodTo'],['年間処方件数','annualPrescriptionCount'],['年間処方数量','annualPrescriptionQuantity'],['数量単位','annualQuantityUnit'],['代替薬のマスター作成の必要性','masterNeedStatus'],['代替薬のマスター作成状況','masterProgress'],['対応状況','status'],['優先度','priority'],['対応期限','dueDate'],['担当者・担当部署','assignedTo'],['代替薬候補・対応案','alternativePlan'],['次に行うこと','nextAction'],['関連対応案件ID','relatedCaseId'],['備考','notes'],['作成日時','createdAt'],['更新日時','updatedAt']];
+ const keys=[['ID','id'],['情報ジャンル','infoGenre'],['医薬品名','drugName'],['成分名','ingredient'],['製造販売会社','company'],['YJコード','yjCode'],['採用区分','targetScope'],['流通状況','supplyIssueType'],['流通上の問題の開始日','supplyIssueStartDate'],['流通上の問題の終了日','supplyIssueEndDate'],['問題を把握した日','issueDetectedDate'],['最新情報確認日','lastConfirmedDate'],['流通状況・理由','supplyDetails'],['供給見通し','supplyOutlook'],['情報源URL','sourceUrl'],['集計期間開始日','annualPeriodFrom'],['集計期間終了日','annualPeriodTo'],['年間処方件数','annualPrescriptionCount'],['年間処方数量','annualPrescriptionQuantity'],['数量単位','annualQuantityUnit'],['代替薬のマスター作成の必要性','masterNeedStatus'],['代替薬のマスター作成状況','masterProgress'],['対応状況','status'],['優先度','priority'],['対応期限','dueDate'],['担当者・担当部署','assignedTo'],['代替薬候補・対応案','alternativePlan'],['次に行うこと','nextAction'],['関連対応案件ID','relatedCaseId'],['備考','notes'],['作成日時','createdAt'],['更新日時','updatedAt']];
  exportCsv(keys,(state.supplyTodos||[]).map(t=>({...t,infoGenre:['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況'})),'院外採用薬_ToDo_'+today()+'.csv');
 });
 $('#addCase').addEventListener('click',()=>openCaseModal());$('#addCaseQuick').addEventListener('click',()=>openCaseModal());$('#addPurchase').addEventListener('click',()=>openPurchaseModal());$('#addPurchaseQuick').addEventListener('click',()=>openPurchaseModal());$('#addHistoryNote').addEventListener('click',()=>openHistoryModal());
