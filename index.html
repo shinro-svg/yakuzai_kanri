@@ -458,34 +458,81 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 }
 
 
-/* v1.0.20: prevent the supply-problem date fields from overlapping on phones.
-   Keep the two dates side-by-side on wider screens; stack them on narrow screens. */
+
+
+
+/* v1.0.21: normalize date controls throughout the mobile information-share form.
+   iOS Safari can render native date inputs wider/taller than their grid cell unless
+   their intrinsic sizing and native appearance are explicitly constrained. */
 @media (max-width: 640px) {
-  .supply-period-field {
-    width: 100%;
-    min-width: 0;
+  .modal-body,
+  .modal-body .form-grid,
+  .modal-body .field,
+  .modal-body .supply-period-field,
+  .modal-body .supply-period-inputs {
+    min-width: 0 !important;
+    max-width: 100% !important;
   }
-  .supply-period-inputs {
+
+  .modal-body .form-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100%;
+  }
+
+  .modal-body .form-grid > .field,
+  .modal-body .form-grid > .supply-period-field {
+    width: 100%;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .modal-body .supply-period-field {
+    grid-column: 1 / -1 !important;
+    box-sizing: border-box;
+    padding: 11px;
+    overflow: hidden;
+  }
+
+  .modal-body .supply-period-inputs {
     display: grid;
     grid-template-columns: minmax(0, 1fr) !important;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
-    min-width: 0;
   }
-  .supply-period-inputs > .field {
+
+  .modal-body .supply-period-inputs > .field {
     width: 100%;
-    min-width: 0;
+    min-width: 0 !important;
+    max-width: 100% !important;
   }
-  .supply-period-inputs .field input[type="date"] {
-    display: block;
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
+
+  /* Apply the same compact dimensions to all date fields, including the
+     issue-detected date, latest-confirmed date and annual-period dates. */
+  .modal-body input[type="date"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    padding: 8px 10px !important;
+    font-size: 16px !important;
+    line-height: 1.2 !important;
+    border-radius: 10px !important;
   }
-  .supply-period-separator {
-    display: none;
+
+  .modal-body input[type="date"]::-webkit-date-and-time-value {
+    min-height: 0;
+    text-align: left;
+  }
+
+  .modal-body .supply-period-separator {
+    display: none !important;
   }
 }
 
@@ -493,7 +540,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.20</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.21</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="supplyTodos">☑　情報共有</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
