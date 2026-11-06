@@ -585,10 +585,11 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
  .quote-vendor-fields .field input[type="date"]{-webkit-appearance:none;appearance:none;width:100%;max-width:100%;min-width:0;font-size:14px}
 }
 </style>
+<!-- v1.0.24: add distribution status option and relabel annual prescription count as annual patient count; preserve stored key for compatibility. -->
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.23</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.24</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="supplyTodos">☑　情報共有</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
@@ -805,7 +806,7 @@ function renderPurchases(){const q=$('#purchaseSearch').value.toLowerCase().trim
  $$('[data-usage-purchase]').forEach(b=>b.addEventListener('click',()=>openUsageModal(b.dataset.usagePurchase)));$$('[data-edit-purchase]').forEach(b=>b.addEventListener('click',()=>openPurchaseModal(b.dataset.editPurchase)));$$('[data-del-purchase]').forEach(b=>b.addEventListener('click',()=>deletePurchase(b.dataset.delPurchase)));
  applyResponsiveTableLabels();
 }
-const supplyIssueTypes=['通常出荷','限定出荷','出荷調整','供給停止・欠品','販売中止','メーカー在庫不足','卸在庫不足','製造上の問題','品質問題・回収','原材料不足','需要急増','供給改善・再開情報','その他'];
+const supplyIssueTypes=['通常出荷','経過措置','限定出荷','出荷調整','供給停止・欠品','販売中止','メーカー在庫不足','卸在庫不足','製造上の問題','品質問題・回収','原材料不足','需要急増','供給改善・再開情報','その他'];
 const supplyTodoStatuses=['未着手','対応中','確認待ち','完了'];
 const supplyTodoPriorities=['高','中','低'];
 function todoStatusPill(s){const cls=s==='完了'?'green':s==='対応中'||s==='確認待ち'?'amber':'red';return `<span class="pill ${cls}">${esc(s||'未着手')}</span>`}
@@ -814,7 +815,7 @@ function openSupplyTodoModal(id=null){
  const t=state.supplyTodos.find(x=>x.id===id)||{};const isEdit=!!id;
  const relatedOptions=[{id:'',label:'関連案件なし'},...state.cases.filter(c=>!c.sample).map(c=>({id:c.id,label:c.drugName}))];
  const linked=`<div class="field full"><label for="f_relatedCaseId">関連する対応案件</label><select id="f_relatedCaseId" name="relatedCaseId">${relatedOptions.map(o=>`<option value="${esc(o.id)}" ${o.id===(t.relatedCaseId||'')?'selected':''}>${esc(o.label)}</option>`).join('')}</select></div>`;
- const html=`<div class="notice">院外採用薬に関する対応事項や情報を共有します。患者氏名・患者ID・個別の処方内容は入力せず、年間処方件数や数量は集計値を入力してください。情報源と最終確認日を残し、流通情報は更新時に再確認してください。</div>
+ const html=`<div class="notice">院外採用薬に関する対応事項や情報を共有します。患者氏名・患者ID・個別の処方内容は入力せず、年間処方人数や処方数量は集計値を入力してください。情報源と最終確認日を残し、流通情報は更新時に再確認してください。</div>
  <div class="form-section">情報ジャンル・医薬品情報</div><div class="form-grid">
  <div class="field full genre-select-field"><label for="f_infoGenre">情報ジャンル <span class="required">*</span></label><select id="f_infoGenre" name="infoGenre" required><option value="流通状況" ${(t.infoGenre||'流通状況')==='流通状況'?'selected':''}>流通状況</option><option value="DI情報" ${t.infoGenre==='DI情報'?'selected':''}>DI情報</option></select><small class="field-help">流通の供給問題に関する記録か、医薬品情報（DI）かを選択してください。</small></div>
  ${inputField('<span class="required">*</span> 医薬品名','drugName',t.drugName||'','text','required')}${inputField('成分名','ingredient',t.ingredient||'')}${inputField('製造販売会社','company',t.company||'')}${inputField('YJコード','yjCode',t.yjCode||'')}${selectField('採用区分','targetScope',['院外処方採用薬','院外・院内共通','確認中'],t.targetScope||'院外処方採用薬')}
@@ -824,8 +825,8 @@ function openSupplyTodoModal(id=null){
  ${textareaField('具体的な流通状況・理由','supplyDetails',t.supplyDetails||'','full')}${textareaField('メーカー・卸からの案内、供給見通し','supplyOutlook',t.supplyOutlook||'','full')}
  </div>
  <div class="form-section">当院の年間処方実績</div><div class="form-grid">
- ${inputField('集計期間（開始日）','annualPeriodFrom',t.annualPeriodFrom||'','date')}${inputField('集計期間（終了日）','annualPeriodTo',t.annualPeriodTo||'','date')}${inputField('年間処方件数（件）','annualPrescriptionCount',t.annualPrescriptionCount??'','number','min="0" step="1" inputmode="numeric"')}${inputField('年間処方数量','annualPrescriptionQuantity',t.annualPrescriptionQuantity??'','number','min="0" step="any" inputmode="decimal"')}${inputField('数量の単位','annualQuantityUnit',t.annualQuantityUnit||'','text','placeholder="錠、包、本など"')}
- <div class="form-note full">直近12か月など、実際の集計期間を入力してください。処方件数と数量は区別し、未集計の場合は空欄にします。</div></div>
+ ${inputField('集計期間（開始日）','annualPeriodFrom',t.annualPeriodFrom||'','date')}${inputField('集計期間（終了日）','annualPeriodTo',t.annualPeriodTo||'','date')}${inputField('年間処方人数（人）','annualPrescriptionCount',t.annualPrescriptionCount??'','number','min="0" step="1" inputmode="numeric"')}${inputField('年間処方数量','annualPrescriptionQuantity',t.annualPrescriptionQuantity??'','number','min="0" step="any" inputmode="decimal"')}${inputField('数量の単位','annualQuantityUnit',t.annualQuantityUnit||'','text','placeholder="錠、包、本など"')}
+ <div class="form-note full">直近12か月など、実際の集計期間を入力してください。処方人数と処方数量は区別し、未集計の場合は空欄にします。</div></div>
  <div class="form-section">代替薬マスター・対応計画</div><div class="form-grid">
  ${selectField('代替薬のマスター作成の必要性','masterNeedStatus',['未確認','必要','不要'],t.masterNeedStatus||'未確認')}${selectField('代替薬のマスター作成状況','masterProgress',['未着手','作成中','作成済み','不要'],t.masterProgress||'未着手')}${selectField('To Doの対応状況','status',supplyTodoStatuses,t.status||'未着手')}${selectField('優先度','priority',supplyTodoPriorities,t.priority||'中')}${inputField('対応期限','dueDate',t.dueDate||'','date')}${inputField('担当者・担当部署','assignedTo',t.assignedTo||'')}
  ${textareaField('代替薬候補・対応案','alternativePlan',t.alternativePlan||'','full')}${textareaField('次に行うこと（To Do）','nextAction',t.nextAction||'','full')}${linked}${textareaField('備考','notes',t.notes||'','full')}
@@ -863,7 +864,7 @@ function renderSupplyTodos(){
  $('#supplyTodoSummary').innerHTML=`<button type="button" class="todo-summary-item todo-summary-link" data-todo-action="open" aria-label="未完了To Doの一覧を表示"><div class="k">未完了 To Do</div><div class="v">${open.length}</div><div class="muted text-sm">完了以外を表示 →</div></button><button type="button" class="todo-summary-item todo-summary-link" data-todo-action="distribution" aria-label="流通状況の情報を表示"><div class="k">流通状況</div><div class="v">${distributionCount}</div><div class="muted text-sm">流通状況の情報を表示 →</div></button><button type="button" class="todo-summary-item todo-summary-link" data-todo-action="di" aria-label="DI情報を表示"><div class="k">DI情報</div><div class="v">${diCount}</div><div class="muted text-sm">DI情報を表示 →</div></button><button type="button" class="todo-summary-item todo-summary-link" data-todo-action="master-pending" aria-label="代替薬マスターが必要で未作成のTo Doを表示"><div class="k">代替薬マスター未作成</div><div class="v" style="color:var(--red)">${masterPending}</div><div class="muted text-sm">必要かつ未作成・作成中 →</div></button>`;
  const cards=list.map(t=>{
   const period=(t.annualPeriodFrom||t.annualPeriodTo)?`${fmtDate(t.annualPeriodFrom)} ～ ${fmtDate(t.annualPeriodTo)}`:'集計期間未入力';
-  const rx=String(t.annualPrescriptionCount??'').trim()!==''?`${Number(t.annualPrescriptionCount).toLocaleString('ja-JP')} 件`:'未集計';
+  const rx=String(t.annualPrescriptionCount??'').trim()!==''?`${Number(t.annualPrescriptionCount).toLocaleString('ja-JP')} 人`:'未集計';
   const qty=String(t.annualPrescriptionQuantity??'').trim()!==''?`${Number(t.annualPrescriptionQuantity).toLocaleString('ja-JP')} ${esc(t.annualQuantityUnit||'')}`:'未集計';
   const dueDays=daysUntilDate(t.dueDate);const dueHtml=t.status!=='完了'&&dueDays!==null&&dueDays<0?`<span class="todo-overdue">期限超過 ${Math.abs(dueDays)}日</span>`:t.dueDate?`${fmtDate(t.dueDate)}${dueDays!==null&&dueDays>=0?`（あと${dueDays}日）`:''}`:'未設定';
   const source=String(t.sourceUrl||'').trim();const sourceHtml=/^https?:\/\//i.test(source)?`<a href="${esc(source)}" target="_blank" rel="noopener noreferrer">情報源を開く</a>`:(source?esc(source):'未登録');
@@ -874,7 +875,7 @@ function renderSupplyTodos(){
   return `<article class="card todo-card"><div class="todo-card-head"><div class="todo-card-title-wrap"><div class="todo-genre-row"><span class="todo-info-genre${genreClass}">${esc(itemGenre)}</span>${t.sample?'<span class="pill gray">サンプル</span>':''}</div><div class="todo-card-title">${esc(t.drugName)}</div><div class="todo-card-meta">${esc(t.ingredient||'成分未入力')} ・ ${esc(t.company||'会社未入力')} ・ YJコード：${esc(t.yjCode||'未入力')}</div></div><div class="todo-badges">${todoPriorityPill(t.priority)}${todoStatusPill(t.status)}</div></div><div class="todo-fields">
  <div class="todo-field full"><div class="k">採用区分</div><div class="v">${esc(t.targetScope||'未設定')}</div></div>
  <div class="todo-field full"><div class="k">流通上の状況</div><div class="v"><strong>${esc(t.supplyIssueType||'未分類')}</strong>${t.supplyDetails?`\n${esc(t.supplyDetails)}`:''}</div>${t.supplyOutlook?`<div class="v muted" style="margin-top:5px">供給見通し：${esc(t.supplyOutlook)}</div>`:''}</div>
- <div class="todo-field"><div class="k">当院の年間処方実績</div><div class="v">件数：${rx}<br>数量：${qty}<br><span class="muted">${esc(period)}</span></div></div>
+ <div class="todo-field"><div class="k">当院の年間処方実績</div><div class="v">人数：${rx}<br>数量：${qty}<br><span class="muted">${esc(period)}</span></div></div>
  <div class="todo-field"><div class="k">代替薬のマスター作成</div><div class="v">作成必要性：<strong>${esc(t.masterNeedStatus||'未確認')}</strong><br>作成状況：${esc(t.masterProgress||'未着手')}</div></div>
  <div class="todo-field"><div class="k">期限・担当</div><div class="v">期限：${dueHtml}<br>担当：${esc(t.assignedTo||'未割当')}</div></div>
  <div class="todo-field"><div class="k">情報確認</div><div class="v">流通上の問題が発生する期間：${esc(supplyIssuePeriod)}<br>把握日：${fmtDate(t.issueDetectedDate)}<br>最新確認日：${fmtDate(t.lastConfirmedDate)}<br>${sourceHtml}</div></div>
@@ -1053,7 +1054,7 @@ $('#supplyTodoPriorityFilter').addEventListener('change',renderSupplyTodos);
 $('#supplyTodoMasterFilter').addEventListener('change',renderSupplyTodos);
 $('#supplyTodoSummary').addEventListener('click',e=>{const b=e.target.closest('[data-todo-action]');if(!b)return;supplyTodoListView='active';$('#supplyTodoSearch').value='';$('#supplyTodoGenreFilter').value='';$('#supplyTodoStatusFilter').value='';$('#supplyTodoPriorityFilter').value='';$('#supplyTodoMasterFilter').value='';switch(b.dataset.todoAction){case 'open':$('#supplyTodoStatusFilter').value='__open__';break;case 'distribution':$('#supplyTodoGenreFilter').value='流通状況';break;case 'di':$('#supplyTodoGenreFilter').value='DI情報';break;case 'master-pending':$('#supplyTodoMasterFilter').value='__required_not_created__';break;}renderSupplyTodos();$('#supplyTodoList').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});});
 $('#exportSupplyTodos').addEventListener('click',()=>{
- const keys=[['ID','id'],['情報ジャンル','infoGenre'],['医薬品名','drugName'],['成分名','ingredient'],['製造販売会社','company'],['YJコード','yjCode'],['採用区分','targetScope'],['流通状況','supplyIssueType'],['流通上の問題の開始日','supplyIssueStartDate'],['流通上の問題の終了日','supplyIssueEndDate'],['問題を把握した日','issueDetectedDate'],['最新情報確認日','lastConfirmedDate'],['流通状況・理由','supplyDetails'],['供給見通し','supplyOutlook'],['情報源URL','sourceUrl'],['集計期間開始日','annualPeriodFrom'],['集計期間終了日','annualPeriodTo'],['年間処方件数','annualPrescriptionCount'],['年間処方数量','annualPrescriptionQuantity'],['数量単位','annualQuantityUnit'],['代替薬のマスター作成の必要性','masterNeedStatus'],['代替薬のマスター作成状況','masterProgress'],['対応状況','status'],['優先度','priority'],['対応期限','dueDate'],['担当者・担当部署','assignedTo'],['代替薬候補・対応案','alternativePlan'],['次に行うこと','nextAction'],['関連対応案件ID','relatedCaseId'],['備考','notes'],['完了日','completedAt'],['作成日時','createdAt'],['更新日時','updatedAt']];
+ const keys=[['ID','id'],['情報ジャンル','infoGenre'],['医薬品名','drugName'],['成分名','ingredient'],['製造販売会社','company'],['YJコード','yjCode'],['採用区分','targetScope'],['流通状況','supplyIssueType'],['流通上の問題の開始日','supplyIssueStartDate'],['流通上の問題の終了日','supplyIssueEndDate'],['問題を把握した日','issueDetectedDate'],['最新情報確認日','lastConfirmedDate'],['流通状況・理由','supplyDetails'],['供給見通し','supplyOutlook'],['情報源URL','sourceUrl'],['集計期間開始日','annualPeriodFrom'],['集計期間終了日','annualPeriodTo'],['年間処方人数','annualPrescriptionCount'],['年間処方数量','annualPrescriptionQuantity'],['数量単位','annualQuantityUnit'],['代替薬のマスター作成の必要性','masterNeedStatus'],['代替薬のマスター作成状況','masterProgress'],['対応状況','status'],['優先度','priority'],['対応期限','dueDate'],['担当者・担当部署','assignedTo'],['代替薬候補・対応案','alternativePlan'],['次に行うこと','nextAction'],['関連対応案件ID','relatedCaseId'],['備考','notes'],['完了日','completedAt'],['作成日時','createdAt'],['更新日時','updatedAt']];
  exportCsv(keys,(state.supplyTodos||[]).map(t=>({...t,infoGenre:['流通状況','DI情報'].includes(t.infoGenre)?t.infoGenre:'流通状況'})),'院外採用薬_ToDo_'+today()+'.csv');
 });
 $$('[data-case-view]').forEach(b=>b.addEventListener('click',()=>{caseListView=b.dataset.caseView;renderCases()}));
