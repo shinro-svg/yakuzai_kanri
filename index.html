@@ -461,7 +461,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 
 
 
-/* v1.0.22: normalize date controls throughout the mobile information-share form.
+/* v1.0.23: normalize date controls throughout the mobile information-share form.
    iOS Safari can render native date inputs wider/taller than their grid cell unless
    their intrinsic sizing and native appearance are explicitly constrained. */
 @media (max-width: 640px) {
@@ -537,7 +537,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 }
 
 
-/* v1.0.22: Completed work is available in dedicated subviews. */
+/* v1.0.23: Completed work is available in dedicated subviews. */
 .subview-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}
 .subview-tab{appearance:none;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);padding:8px 16px;font:inherit;font-size:13px;font-weight:750;cursor:pointer;min-height:40px}
 .subview-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
@@ -552,11 +552,43 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
  .active-filter-group{width:100%}
  .quote-candidate-drugprice{max-width:none}
 }
+
+/* v1.0.23: Separate official drug price from wholesalers' quote prices. */
+.quote-candidate{display:block;width:100%;max-width:100%;min-width:0;overflow:hidden;padding:14px;margin:14px 0;background:#fbfdfe;border:1px solid var(--line);border-radius:13px}
+.quote-candidate-title{margin:0 0 11px;font-size:15px;font-weight:800;color:var(--blue)}
+.quote-candidate-name{width:100%;max-width:none;margin:0 0 12px;min-width:0}
+.quote-candidate-name input{width:100%;max-width:100%;min-width:0}
+.candidate-drugprice-panel{display:block;width:100%;max-width:100%;min-width:0;margin:0 0 14px;padding:12px;background:#edf5fb;border:1px solid #cbddea;border-radius:10px}
+.candidate-drugprice-heading{font-size:13px;font-weight:800;color:#1d527a;line-height:1.4}
+.candidate-drugprice-panel>p{margin:3px 0 9px;color:#567185;font-size:11px;line-height:1.5}
+.quote-candidate-drugprice{width:100%;max-width:340px;min-width:0;margin:0}
+.quote-candidate-drugprice input{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-variant-numeric:tabular-nums}
+.vendor-quote-section{display:block;width:100%;max-width:100%;min-width:0;margin:0;padding-top:12px;border-top:2px solid #d6e2ea}
+.vendor-quote-heading{display:flex;flex-direction:column;gap:2px;margin:0 0 10px;min-width:0}
+.vendor-quote-heading strong{font-size:13px;color:#344f62}
+.vendor-quote-heading span{font-size:11px;color:var(--muted);line-height:1.45}
+.quote-input-grid{display:grid;width:100%;max-width:100%;min-width:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.quote-vendor-card{display:block;width:100%;max-width:100%;min-width:0;overflow:hidden}
+.quote-vendor-fields{display:grid;width:100%;min-width:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.quote-vendor-fields>.field{min-width:0;max-width:100%}
+.quote-vendor-fields .field input,.quote-vendor-fields .field select{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+@media(max-width:640px){
+ .quote-candidate{padding:11px;margin:11px 0;border-radius:11px}
+ .candidate-drugprice-panel{padding:10px;margin-bottom:12px}
+ .quote-candidate-drugprice{max-width:none}
+ .quote-candidate-drugprice input{min-height:44px;padding:10px 11px;font-size:16px}
+ .quote-input-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px}
+ .quote-vendor-card{padding:10px}
+ .quote-vendor-fields{grid-template-columns:minmax(0,1fr)!important;gap:9px}
+ .quote-vendor-fields>.field,.quote-vendor-fields .quote-wide{grid-column:1/-1!important;width:100%;min-width:0;max-width:100%}
+ .quote-vendor-fields .field input,.quote-vendor-fields .field select{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;min-height:44px;padding:9px 10px;font-size:14px}
+ .quote-vendor-fields .field input[type="date"]{-webkit-appearance:none;appearance:none;width:100%;max-width:100%;min-width:0;font-size:14px}
+}
 </style>
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.22</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.23</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="supplyTodos">☑　情報共有</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
@@ -937,14 +969,14 @@ function quoteCandidateMarkup(c,index,legacyNames){
   const vendorTitle=s.key==='Other'?'その他（自由入力）':s.label;
   return `<div class="quote-vendor-card"><div class="quote-vendor-title" data-vendor-key="${s.key}">${esc(vendorTitle)}</div><div class="quote-vendor-fields">
    ${s.key==='Other'?`<div class="field full"><label for="f_${base}OtherSupplierName">卸業者名</label><input id="f_${base}OtherSupplierName" name="${base}OtherSupplierName" type="text" value="${val({v:otherSupplierName},'v')}" placeholder="例：新たに追加する卸業者"></div>`:''}
-   <div class="field"><label for="f_${base}">見積価格（円）</label><input id="f_${base}" name="${base}" type="number" min="0" step="any" value="${val({v:price},'v')}" placeholder="価格" inputmode="decimal"></div>
+   <div class="field"><label for="f_${base}">卸見積価格（円）</label><input id="f_${base}" name="${base}" type="number" min="0" step="any" value="${val({v:price},'v')}" placeholder="見積価格" inputmode="decimal"></div>
    <div class="field"><label for="f_${base}Unit">単位（例：錠/箱）</label><input id="f_${base}Unit" name="${base}Unit" type="text" value="${val({v:unit},'v')}" placeholder="錠/箱"></div>
    <div class="field"><label for="f_${base}Expiry">見積有効期限</label><input id="f_${base}Expiry" name="${base}Expiry" type="date" value="${val({v:expiry},'v')}"></div>
    <div class="field"><label for="f_${base}QuoteDate">見積取得日</label><input id="f_${base}QuoteDate" name="${base}QuoteDate" type="date" value="${val({v:quoteDate},'v')}"></div>
   </div></div>`;
  }).join('');
  const drugPrice=quoteValue(c,index,'DrugPrice');
- return `<div class="quote-candidate"><div class="quote-candidate-title">代替薬候補 ${index}</div><div class="field quote-candidate-name"><label for="f_quoteAlt${index}Name">候補薬名・規格</label><input id="f_quoteAlt${index}Name" name="quoteAlt${index}Name" type="text" value="${val({v:name},'v')}" placeholder="薬剤師が候補を入力"></div><div class="field quote-candidate-drugprice"><label for="f_quoteAlt${index}DrugPrice">薬価（円／単位）</label><input id="f_quoteAlt${index}DrugPrice" name="quoteAlt${index}DrugPrice" type="number" min="0" step="any" inputmode="decimal" value="${val({v:drugPrice},'v')}" placeholder="薬価を入力"></div><div class="quote-input-grid">${vendors}</div></div>`;
+ return `<div class="quote-candidate"><div class="quote-candidate-title">代替薬候補 ${index}</div><div class="field quote-candidate-name"><label for="f_quoteAlt${index}Name">候補薬名・規格</label><input id="f_quoteAlt${index}Name" name="quoteAlt${index}Name" type="text" value="${val({v:name},'v')}" placeholder="薬剤師が候補を入力"></div><section class="candidate-drugprice-panel" aria-label="薬価"><div class="candidate-drugprice-heading">薬価（公定薬価）</div><p>薬価基準収載価格を入力します。卸業者からの見積価格とは別の項目です。</p><div class="field quote-candidate-drugprice"><label for="f_quoteAlt${index}DrugPrice">薬価（円／単位）</label><input id="f_quoteAlt${index}DrugPrice" name="quoteAlt${index}DrugPrice" type="number" min="0" step="any" inputmode="decimal" value="${val({v:drugPrice},'v')}" placeholder="公定薬価を入力"></div></section><section class="vendor-quote-section" aria-label="卸業者の見積もり"><div class="vendor-quote-heading"><strong>卸業者の見積もり価格</strong><span>実際の仕入価格・単位・有効期限を登録します。</span></div><div class="quote-input-grid">${vendors}</div></section></div>`;
 }
 function getQuoteCount(c){
  let count=0;
