@@ -585,7 +585,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
  .quote-vendor-fields .field input[type="date"]{-webkit-appearance:none;appearance:none;width:100%;max-width:100%;min-width:0;font-size:14px}
 }
 
-/* v1.0.26: case adoption and stock-card status labels. */
+/* v1.0.27: case adoption and stock-card status labels. */
 .case-adoption-badge{display:inline-flex;align-items:center;margin-top:5px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;line-height:1.35;border:1px solid #cbd8e1;background:#f2f6f8;color:#4c6473}
 .case-adoption-badge.official{border-color:#a9d2bd;background:#edf8f1;color:#176b47}
 .case-adoption-badge.temporary{border-color:#f0d39b;background:#fff7e7;color:#855b08}
@@ -593,12 +593,74 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 .case-stockcard-status.created{background:#eaf7ef;color:#176b47}
 .case-stockcard-status.pending{background:#fff6dc;color:#956000}
 #caseCompletedFilters{margin:0 0 12px}
+
+/* v1.0.27: completed-case table gives medicine names priority over the numeric constant column. */
+@media (min-width: 641px) {
+  #tab-cases table.cases-completed-table {
+    width: 100%;
+    min-width: 1210px;
+    table-layout: fixed;
+  }
+  #tab-cases table.cases-completed-table th:nth-child(1) { width: 120px; }
+  #tab-cases table.cases-completed-table th:nth-child(2) { width: 350px; }
+  #tab-cases table.cases-completed-table th:nth-child(3) { width: 70px; }
+  #tab-cases table.cases-completed-table th:nth-child(4) { width: 145px; }
+  #tab-cases table.cases-completed-table th:nth-child(5) { width: 200px; }
+  #tab-cases table.cases-completed-table th:nth-child(6) { width: 240px; }
+  #tab-cases table.cases-completed-table th:nth-child(7) { width: 85px; }
+  #tab-cases table.cases-completed-table tbody#casesTable td:nth-child(1) { width: 120px; }
+  #tab-cases table.cases-completed-table tbody#casesTable td:nth-child(2) { width: 350px; }
+  #tab-cases table.cases-completed-table tbody#casesTable td:nth-child(3) { width: 70px; }
+  #tab-cases table.cases-completed-table tbody#casesTable td:nth-child(4) { width: 145px; }
+  #tab-cases table.cases-completed-table tbody#casesTable td:nth-child(5) { width: 200px; }
+  #tab-cases table.cases-completed-table tbody#casesTable td:nth-child(6) { width: 240px; }
+  #tab-cases table.cases-completed-table tbody#casesTable td:nth-child(7) { width: 85px; }
+  #tab-cases table.cases-completed-table tbody#casesTable td.completed-constant-cell {
+    white-space: nowrap;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+}
+#tab-cases .completed-drug-name {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-overflow: clip;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 640px) {
+  #tab-cases table.cases-completed-table { width: 100% !important; min-width: 0 !important; table-layout: auto; }
+  #tab-cases table.cases-completed-table tbody#casesTable tr td:nth-child(2) {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 12px 0 !important;
+  }
+  #tab-cases table.cases-completed-table tbody#casesTable tr td:nth-child(2)::before {
+    display: block !important;
+    width: 100%;
+    margin: 0 0 7px;
+    padding: 0;
+  }
+  #tab-cases table.cases-completed-table .completed-drug-name {
+    font-size: 15px;
+    line-height: 1.5;
+    text-align: left;
+  }
+}
+
 </style>
-<!-- v1.0.26: shared dashboard cards, stock-card tracking, and adoption classification. -->
+<!-- v1.0.27: shared dashboard cards, stock-card tracking, and adoption classification. -->
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.26</span></div></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand brand-home" id="brandHome" href="#home" aria-label="薬剤部ナレッジ管理：ホームへ戻る"><div><h1>薬剤部ナレッジ管理</h1><div class="subhead">医薬品変更・供給問題・臨時購入の共有ツール</div></div></a><div class="header-status"><span class="pill white" id="cloudStatus">● 共有DB未設定</span><span class="pill white">v1.0.27</span></div></div></header>
 <div class="quick-fab-wrap" role="group" aria-label="共通操作"><button type="button" id="syncFab" class="sync-fab" aria-label="共有データを今すぐ同期">↻　同期</button><button type="button" id="homeFab" class="home-fab" aria-label="ホーム（ダッシュボード）に戻る"><span class="home-fab-icon" aria-hidden="true">⌂</span><span>ホーム</span></button></div>
 <main class="wrap">
 <nav class="nav" aria-label="メインメニュー"><button class="active" data-tab="dashboard">⌂　ホーム</button><button data-tab="cases">◈　対応案件</button><button data-tab="purchases">▣　臨時購入</button><button data-tab="supplyTodos">☑　情報共有</button><button data-tab="history">◷　意思決定履歴</button><button data-tab="settings">⚙　データ管理</button></nav>
@@ -668,7 +730,7 @@ button,.btn,.nav button,.stat-link{touch-action:manipulation;-webkit-tap-highlig
 </div>
 
 </section>
-<div class="footer">薬剤部ナレッジ管理 v1.0.26｜運用版・スマホ／PC対応</div>
+<div class="footer">薬剤部ナレッジ管理 v1.0.27｜運用版・スマホ／PC対応</div>
 </main>
 </div>
 
@@ -801,9 +863,10 @@ function renderCases(){
   return (!q||hay.includes(q))&&(completed||statusMatch&&(!type||c.type===type)&&stockoutMatch);
  }).sort((a,b)=>completed?completionDate(b).localeCompare(completionDate(a)):caseSortPriority(a,b));
  const table=$('#casesTable').closest('table');
+ table.classList.toggle('cases-completed-table',completed);
  if(completed){
   table.querySelector('thead').innerHTML='<tr><th>対応完了日</th><th>医薬品名</th><th>定数</th><th>在庫カード作成</th><th>代替薬</th><th>備考</th><th>操作</th></tr>';
-  $('#casesTable').innerHTML=list.length?list.map(c=>`<tr><td>${fmtDate(completionDate(c))}</td><td><button class="case-link" data-edit-case="${esc(c.id)}">${esc(c.drugName)}</button><div class="subline">${esc(c.type||'')}</div>${caseAdoptionBadge(c)}</td><td><div class="completed-value">${esc(String(c.constantStock||'').trim()||'—')}</div></td><td>${stockCardStatusBadge(c)}</td><td><div class="completed-value">${esc(caseAlternativeSummary(c))}</div></td><td><div class="completed-value">${esc(String(c.notes||'').trim()||'—')}</div></td><td><button class="btn small" data-edit-case="${esc(c.id)}">編集</button></td></tr>`).join(''):'<tr><td colspan="7"><div class="empty">完了した対応案件はありません。</div></td></tr>';
+  $('#casesTable').innerHTML=list.length?list.map(c=>`<tr><td>${fmtDate(completionDate(c))}</td><td><button type="button" class="case-link completed-drug-name" data-edit-case="${esc(c.id)}" title="${esc(c.drugName)}" aria-label="${esc(c.drugName)}を編集">${esc(c.drugName)}</button><div class="subline">${esc(c.type||'')}</div>${caseAdoptionBadge(c)}</td><td class="completed-constant-cell"><div class="completed-value">${esc(String(c.constantStock||'').trim()||'—')}</div></td><td>${stockCardStatusBadge(c)}</td><td><div class="completed-value">${esc(caseAlternativeSummary(c))}</div></td><td><div class="completed-value">${esc(String(c.notes||'').trim()||'—')}</div></td><td><button class="btn small" data-edit-case="${esc(c.id)}">編集</button></td></tr>`).join(''):'<tr><td colspan="7"><div class="empty">完了した対応案件はありません。</div></td></tr>';
   $('#caseCount').textContent=`${list.length}件表示／完了案件${all.filter(c=>c.status==='完了').length}件${cardStatus?`・在庫カード${cardStatus}`:''}`;
  }else{
   table.querySelector('thead').innerHTML='<tr><th>医薬品</th><th>期限・切替日</th><th>代替薬</th><th>見積状況</th><th>対応状況</th><th>薬事委員会決定</th><th>更新日</th><th>操作</th></tr>';
